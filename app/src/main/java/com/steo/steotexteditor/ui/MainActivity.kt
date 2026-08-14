@@ -1,4 +1,4 @@
-package com.steo.steotexteditor
+package com.steo.steotexteditor.ui.``
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
