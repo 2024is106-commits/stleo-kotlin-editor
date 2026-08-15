@@ -1,6 +1,8 @@
 package com.steo.steotexteditor.ui
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +23,7 @@ class EditorFragment : Fragment() {
     private lateinit var fileRepository: FileRepository
     private var currentFile: FileEntity? = null
     private var currentFileId: Long = -1
+    private var isDirty = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +43,7 @@ class EditorFragment : Fragment() {
         currentFileId = arguments?.getLong("file_id") ?: -1
         
         setupToolbar()
+        setupTextWatcher()
         loadFile()
     }
 
@@ -68,6 +72,30 @@ class EditorFragment : Fragment() {
         }
     }
 
+    private fun setupTextWatcher() {
+        binding.editorView.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!isDirty) {
+                    isDirty = true
+                    updateToolbarTitle()
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+
+    private fun updateToolbarTitle() {
+        val title = currentFile?.name ?: "Untitled"
+        if (isDirty) {
+            binding.toolbar.title = "$title*"
+        } else {
+            binding.toolbar.title = title
+        }
+    }
+
     private fun loadFile() {
         if (currentFileId == -1L) {
             // New file
@@ -79,6 +107,7 @@ class EditorFragment : Fragment() {
                 isReadOnly = false
             )
             binding.editorView.setText("")
+            updateToolbarTitle()
             return
         }
         
@@ -88,6 +117,8 @@ class EditorFragment : Fragment() {
                 currentFile = file
                 val content = com.steo.steotexteditor.util.FileHelper.readFile(file.path)
                 binding.editorView.setText(content)
+                isDirty = false
+                updateToolbarTitle()
             } else {
                 Toast.makeText(context, "File not found", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.popBackStack()
@@ -116,6 +147,8 @@ class EditorFragment : Fragment() {
             }
             
             currentFileId = fileId
+            isDirty = false
+            updateToolbarTitle()
             Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
         }
     }
