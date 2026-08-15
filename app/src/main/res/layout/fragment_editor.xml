@@ -12,8 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorSurface"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light.PopupMenu.Overflow"
-        app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
+        app:navigationIcon="@drawable/ic_menu_close_clear_cancel"
         app:menu="@menu/editor_menu" />
 
     <!-- The actual text editor -->
