@@ -62,6 +62,15 @@ class EditorFragment : Fragment() {
         setupToolbar()
         setupTextWatcher()
         loadFile()
+        
+        // Restore crash recovery content if available
+        val crashRecoveryContent = FileHelper.readCrashRecovery(context)
+        if (crashRecoveryContent != null) {
+            binding.editorView.setText(crashRecoveryContent)
+            isDirty = true
+            updateToolbarTitle()
+            FileHelper.clearCrashRecovery(context)
+        }
     }
 
     private fun setupToolbar() {
@@ -86,6 +95,10 @@ class EditorFragment : Fragment() {
                 }
                 R.id.action_save_as -> {
                     saveAsFile()
+                    true
+                }
+                R.id.action_versions -> {
+                    showVersions()
                     true
                 }
                 R.id.action_delete -> {
@@ -273,6 +286,39 @@ class EditorFragment : Fragment() {
             .show()
     }
 
+    private fun showVersions() {
+        val file = currentFile ?: return
+        lifecycleScope.launch {
+            val versions = viewModel.getVersionsForFile(file.id)
+            if (versions.isEmpty()) {
+                activity?.runOnUiThread {
+                    Toast.makeText(context, "No versions available", Toast.LENGTH_SHORT).show()
+                }
+                return@launch
+            }
+            
+            val versionNumbers = versions.map { it.versionNumber }.toTypedArray()
+            activity?.runOnUiThread {
+                AlertDialog.Builder(context)
+                    .setTitle("Select Version")
+                    .setItems(versionNumbers.map { "Version $it" }.toTypedArray()) { dialog, which ->
+                        val selectedVersion = versions[which]
+                        viewModel.restoreVersion(file.id, selectedVersion.versionNumber) { success ->
+                            activity?.runOnUiThread {
+                                if (success) {
+                                    loadFile()
+                                    Toast.makeText(context, "Version restored", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Failed to restore version", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    }
+                    .show()
+            }
+        }
+    }
+
     private fun deleteFile() {
         val file = currentFile ?: return
         
@@ -289,6 +335,15 @@ class EditorFragment : Fragment() {
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Save crash recovery content
+        val content = binding.editorView.text.toString()
+        if (content.isNotEmpty()) {
+            FileHelper.saveCrashRecovery(context, content)
+        }
     }
 
     override fun onDestroyView() {
