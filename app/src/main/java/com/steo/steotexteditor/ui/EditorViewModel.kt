@@ -43,6 +43,9 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
                 lastModified = System.currentTimeMillis(),
                 isReadOnly = false
             )
+            // Write content to disk first
+            FileHelper.writeFile(path, content)
+            // Then save to database with version
             val fileId = fileRepository.saveFileWithVersion(newFile, content, "Initial save")
             onSaved(fileId)
         }
