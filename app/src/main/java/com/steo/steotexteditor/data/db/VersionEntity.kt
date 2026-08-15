@@ -2,6 +2,7 @@ package com.steo.steotexteditor.data.db
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -11,7 +12,8 @@ import androidx.room.PrimaryKey
         parentColumns = ["id"],
         childColumns = ["fileId"],
         onDelete = ForeignKey.CASCADE
-    )]
+    )],
+    indices = [Index(value = ["fileId"])]
 )
 data class VersionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
