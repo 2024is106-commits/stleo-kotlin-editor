@@ -25,6 +25,10 @@ class FileRepository(private val context: Context) {
         fileDao.setReadOnly(fileId, readOnly)
     }
 
+    suspend fun deleteFile(file: FileEntity) {
+        fileDao.deleteFile(file)
+    }
+
     // ── Save & version creation ───────────────────────────────────
 
     /**
