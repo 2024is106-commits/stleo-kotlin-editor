@@ -2,8 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/menu_recent_files"
-        android:title="@string/menu_recent_files" />
+        android:title="@string/menu_recent_files"
+        android:icon="@drawable/ic_baseline_history_24"
+        android:iconTint="@color/icon_tint_soft_white"
+        android:textColor="@color/text_off_white" />
     <item
         android:id="@+id/menu_version_history"
-        android:title="@string/menu_version_history" />
+        android:title="@string/menu_version_history"
+        android:icon="@drawable/ic_baseline_history_24"
+        android:iconTint="@color/icon_tint_soft_white"
+        android:textColor="@color/text_off_white" />
 </menu>

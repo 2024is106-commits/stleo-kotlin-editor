@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/deep_space_black"
+    android:fitsSystemWindows="true">
 
     <!-- Main content -->
     <androidx.fragment.app.FragmentContainerView
@@ -13,7 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:navGraph="@navigation/nav_graph"
-        app:defaultNavHost="true"/>
+        app:defaultNavHost="true"
+        android:fitsSystemWindows="true"/>
 
     <!-- Sidebar drawer -->
     <com.google.android.material.navigation.NavigationView
@@ -21,7 +24,14 @@
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:background="@drawable/starfield_background"
         app:headerLayout="@layout/nav_header"
-        app:menu="@menu/drawer_menu"/>
+        app:menu="@menu/drawer_menu"
+        app:itemTextColor="@color/text_off_white"
+        app:itemIconTint="@color/icon_tint_soft_white"
+        app:dividerVerticalPadding="8dp"
+        app:dividerHeight="1dp"
+        app:dividerColor="@color/divider_color"
+        android:fitsSystemWindows="true"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="deep_space_black">#0A0A0F</color>
+    <color name="editor_canvas_dark">#111118</color>
+    <color name="primary_accent_purple">#7B2FBE</color>
+    <color name="text_off_white">#E8E8F0</color>
+    <color name="icon_tint_soft_white">#DCDCF0</color>
+    <color name="unselected_item_color">#5A5A7A</color>
+    <color name="divider_color">#2A2A3E</color>
+    <color name="popup_menu_background">#1A1A2E</color>
 </resources>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/deep_space_black" />
+    <item>
+        <shape android:shape="oval">
+            <size android:width="2dp" android:height="2dp" />
+            <solid android:color="#33DCDCF0" />
+        </shape>
+        <item android:top="10dp" android:left="20dp" />
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <size android:width="3dp" android:height="3dp" />
+            <solid android:color="#40DCDCF0" />
+        </shape>
+        <item android:top="30dp" android:left="50dp" />
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <size android:width="2dp" android:height="2dp" />
+            <solid android:color="#50DCDCF0" />
+        </shape>
+        <item android:top="60dp" android:left="80dp" />
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <size android:width="4dp" android:height="4dp" />
+            <solid android:color="#30DCDCF0" />
+        </shape>
+        <item android:top="100dp" android:left="120dp" />
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <size android:width="3dp" android:height="3dp" />
+            <solid android:color="#60DCDCF0" />
+        </shape>
+        <item android:top="150dp" android:left="180dp" />
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <size android:width="2dp" android:height="2dp" />
+            <solid android:color="#40DCDCF0" />
+        </shape>
+        <item android:top="200dp" android:left="220dp" />
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <size android:width="3dp" android:height="3dp" />
+            <solid android:color="#50DCDCF0" />
+        </shape>
+        <item android:top="250dp" android:left="280dp" />
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <size android:width="2dp" android:height="2dp" />
+            <solid android:color="#30DCDCF0" />
+        </shape>
+        <item android:top="300dp" android:left="320dp" />
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <size android:width="4dp" android:height="4dp" />
+            <solid android:color="#60DCDCF0" />
+        </shape>
+        <item android:top="350dp" android:left="380dp" />
+    </item>
+</layer-list>

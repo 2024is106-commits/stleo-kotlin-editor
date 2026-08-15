@@ -1,8 +1,36 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Steotexteditor" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:windowBackground">@color/deep_space_black</item>
+        <item name="colorPrimary">@color/primary_accent_purple</item>
+        <item name="colorOnSurface">@color/text_off_white</item>
+        <item name="android:textColor">@color/text_off_white</item>
+        <item name="android:textColorPrimary">@color/text_off_white</item>
+        <item name="android:textColorSecondary">@color/icon_tint_soft_white</item>
+        <item name="android:statusBarColor">@color/deep_space_black</item>
+        <item name="android:navigationBarColor">@color/deep_space_black</item>
+        <item name="toolbarStyle">@style/Widget.Steotexteditor.Toolbar</item>
+        <item name="popupTheme">@style/Theme.Steotexteditor.Popup</item>
+    </style>
+
+    <style name="Widget.Steotexteditor.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">@color/deep_space_black</item>
+        <item name="android:titleTextColor">@color/text_off_white</item>
+        <item name="android:theme">@style/ThemeOverlay.Steotexteditor.Toolbar</item>
+    </style>
+
+    <style name="ThemeOverlay.Steotexteditor.Toolbar" parent="ThemeOverlay.Material3.Dark">
+        <item name="android:tint">@color/icon_tint_soft_white</item>
+        <item name="android:textColorSecondary">@color/icon_tint_soft_white</item>
+        <item name="android:textColorPrimary">@color/text_off_white</item>
+        <item name="colorControlNormal">@color/icon_tint_soft_white</item>
+        <item name="colorControlActivated">@color/primary_accent_purple</item>
+    </style>
+
+    <style name="Theme.Steotexteditor.Popup" parent="Theme.Material3.PopupWindow">
+        <item name="android:background">@color/popup_menu_background</item>
+        <item name="android:textColor">@color/text_off_white</item>
+        <item name="android:textColorSecondary">@color/text_off_white</item>
     </style>
 
     <style name="Theme.Steotexteditor" parent="Base.Theme.Steotexteditor" />

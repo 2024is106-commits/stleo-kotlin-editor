@@ -3,17 +3,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/deep_space_black"
+    android:fitsSystemWindows="true">
 
     <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorSurface"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:background="@color/deep_space_black"
+        android:theme="@style/ThemeOverlay.Steotexteditor.Toolbar"
+        android:paddingTop="?attr/actionBarSize"
         app:navigationIcon="@drawable/ic_menu_close_clear_cancel"
-        app:menu="@menu/editor_menu" />
+        app:navigationIconTint="@color/icon_tint_soft_white"
+        app:menu="@menu/editor_menu"
+        app:title="@string/editor_title"
+        app:titleTextColor="@color/text_off_white"
+        app:popupTheme="@style/Theme.Steotexteditor.Popup"
+        android:fitsSystemWindows="true"/>
 
     <!-- The actual text editor -->
     <EditText
@@ -21,13 +29,15 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@null"
+        android:background="@color/editor_canvas_dark"
         android:fontFamily="monospace"
         android:gravity="top|start"
         android:inputType="textMultiLine|textNoSuggestions"
-        android:padding="12dp"
+        android:padding="16dp"
         android:scrollbars="vertical"
-        android:textColor="?attr/colorOnSurface"
-        android:textSize="14sp" />
+        android:textColor="@color/text_off_white"
+        android:textSize="14sp"
+        android:cursorDrawable="@drawable/cursor_drawable"
+        android:fitsSystemWindows="true"/>
 
 </LinearLayout>
