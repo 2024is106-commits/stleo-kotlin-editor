@@ -13,15 +13,12 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/deep_space_black"
-        android:theme="@style/ThemeOverlay.Steotexteditor.Toolbar"
-        android:paddingTop="?attr/actionBarSize"
         app:navigationIcon="@drawable/ic_menu_close_clear_cancel"
         app:navigationIconTint="@color/icon_tint_soft_white"
-        app:menu="@menu/editor_menu"
-        app:title="@string/editor_title"
         app:titleTextColor="@color/text_off_white"
         app:popupTheme="@style/Theme.Steotexteditor.Popup"
-        android:fitsSystemWindows="true"/>
+        app:titleTextAppearance="@style/TextAppearance.Steotexteditor.ToolbarTitle"
+        app:menu="@menu/editor_menu" />
 
     <!-- The actual text editor -->
     <EditText
@@ -37,7 +34,6 @@
         android:scrollbars="vertical"
         android:textColor="@color/text_off_white"
         android:textSize="14sp"
-        android:cursorDrawable="@drawable/cursor_drawable"
-        android:fitsSystemWindows="true"/>
+        android:textCursorDrawable="@drawable/cursor_drawable" />
 
 </LinearLayout>

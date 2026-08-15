@@ -4,37 +4,37 @@
     <item
         android:id="@+id/action_new"
         android:icon="@android:drawable/ic_menu_add"
-        android:iconTint="@color/icon_tint_soft_white"
+        app:iconTint="@color/icon_tint_soft_white"
         android:title="New"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_open"
         android:icon="@drawable/ic_baseline_open_in_browser_24"
-        android:iconTint="@color/icon_tint_soft_white"
+        app:iconTint="@color/icon_tint_soft_white"
         android:title="Open"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_save"
         android:icon="@android:drawable/ic_menu_save"
-        android:iconTint="@color/icon_tint_soft_white"
+        app:iconTint="@color/icon_tint_soft_white"
         android:title="Save"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_save_as"
         android:icon="@android:drawable/ic_menu_save"
-        android:iconTint="@color/icon_tint_soft_white"
+        app:iconTint="@color/icon_tint_soft_white"
         android:title="Save As"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_versions"
         android:icon="@android:drawable/ic_menu_recent_history"
-        android:iconTint="@color/icon_tint_soft_white"
+        app:iconTint="@color/icon_tint_soft_white"
         android:title="Versions"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_delete"
         android:icon="@drawable/ic_baseline_delete_24"
-        android:iconTint="@color/icon_tint_soft_white"
+        app:iconTint="@color/icon_tint_soft_white"
         android:title="Delete"
         app:showAsAction="ifRoom" />
 </menu>

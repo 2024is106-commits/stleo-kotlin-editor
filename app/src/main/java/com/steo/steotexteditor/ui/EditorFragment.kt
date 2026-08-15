@@ -16,6 +16,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.steo.steotexteditor.R
 import com.steo.steotexteditor.data.db.FileEntity
+import com.steo.steotexteditor.data.db.VersionEntity
 import com.steo.steotexteditor.databinding.FragmentEditorBinding
 import com.steo.steotexteditor.util.FileHelper
 import kotlinx.coroutines.launch
@@ -41,7 +42,7 @@ class EditorFragment : Fragment() {
                         isDirty = false
                         updateToolbarTitle()
                     } else {
-                        Toast.makeText(context, "Failed to open file", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Failed to open file", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -64,12 +65,12 @@ class EditorFragment : Fragment() {
         loadFile()
         
         // Restore crash recovery content if available
-        val crashRecoveryContent = FileHelper.readCrashRecovery(context)
+        val crashRecoveryContent = FileHelper.readCrashRecovery(requireContext())
         if (crashRecoveryContent != null) {
             binding.editorView.setText(crashRecoveryContent)
             isDirty = true
             updateToolbarTitle()
-            FileHelper.clearCrashRecovery(context)
+            FileHelper.clearCrashRecovery(requireContext())
         }
     }
 
@@ -157,7 +158,7 @@ class EditorFragment : Fragment() {
                     isDirty = false
                     updateToolbarTitle()
                 } else {
-                    Toast.makeText(context, "File not found", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "File not found", Toast.LENGTH_SHORT).show()
                     parentFragmentManager.popBackStack()
                 }
             }
@@ -200,7 +201,7 @@ class EditorFragment : Fragment() {
     }
 
     private fun showUnsavedChangesDialog(listener: DialogInterface.OnClickListener) {
-        AlertDialog.Builder(context)
+        AlertDialog.Builder(requireContext())
             .setTitle("Unsaved Changes")
             .setMessage("You have unsaved changes. Do you want to save before continuing?")
             .setPositiveButton("Save", listener)
@@ -243,7 +244,7 @@ class EditorFragment : Fragment() {
                     currentFileId = fileId
                     isDirty = false
                     updateToolbarTitle()
-                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
                 }
             }
         } else {
@@ -253,7 +254,7 @@ class EditorFragment : Fragment() {
                     currentFileId = fileId
                     isDirty = false
                     updateToolbarTitle()
-                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -262,10 +263,10 @@ class EditorFragment : Fragment() {
     private fun saveAsFile() {
         val content = binding.editorView.text.toString()
         
-        val input = EditText(context)
+        val input = EditText(requireContext())
         input.setText(currentFile?.name ?: "Untitled")
         
-        AlertDialog.Builder(context)
+        AlertDialog.Builder(requireContext())
             .setTitle("Save As")
             .setMessage("Enter file name:")
             .setView(input)
@@ -277,7 +278,7 @@ class EditorFragment : Fragment() {
                             currentFileId = fileId
                             isDirty = false
                             updateToolbarTitle()
-                            Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -288,49 +289,41 @@ class EditorFragment : Fragment() {
 
     private fun showVersions() {
         val file = currentFile ?: return
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             val versions = viewModel.getVersionsForFile(file.id)
             if (versions.isEmpty()) {
-                activity?.runOnUiThread {
-                    Toast.makeText(context, "No versions available", Toast.LENGTH_SHORT).show()
-                }
+                Toast.makeText(requireContext(), "No versions available", Toast.LENGTH_SHORT).show()
                 return@launch
             }
             
-            val versionNumbers = versions.map { it.versionNumber }.toTypedArray()
-            activity?.runOnUiThread {
-                AlertDialog.Builder(context)
-                    .setTitle("Select Version")
-                    .setItems(versionNumbers.map { "Version $it" }.toTypedArray()) { dialog, which ->
-                        val selectedVersion = versions[which]
-                        viewModel.restoreVersion(file.id, selectedVersion.versionNumber) { success ->
-                            activity?.runOnUiThread {
-                                if (success) {
-                                    loadFile()
-                                    Toast.makeText(context, "Version restored", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Toast.makeText(context, "Failed to restore version", Toast.LENGTH_SHORT).show()
-                                }
-                            }
+            val versionNumbers = versions.map { it.versionNumber.toString() }.toTypedArray()
+            AlertDialog.Builder(requireContext())
+                .setTitle("Select Version")
+                .setItems(versionNumbers.map { "Version $it" }.toTypedArray()) { _, which ->
+                    val selectedVersion = versions[which]
+                    viewModel.restoreVersion(file.id, selectedVersion.versionNumber) { success ->
+                        if (success) {
+                            loadFile()
+                            Toast.makeText(requireContext(), "Version restored", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to restore version", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    .show()
-            }
+                }
+                .show()
         }
     }
 
     private fun deleteFile() {
         val file = currentFile ?: return
         
-        AlertDialog.Builder(context)
+        AlertDialog.Builder(requireContext())
             .setTitle("Delete File")
             .setMessage("Are you sure you want to delete ${file.name}?")
             .setPositiveButton("Delete") { _, _ ->
                 viewModel.deleteFile(file) {
-                    activity?.runOnUiThread {
-                        Toast.makeText(context, "File deleted", Toast.LENGTH_SHORT).show()
-                        parentFragmentManager.popBackStack()
-                    }
+                    Toast.makeText(requireContext(), "File deleted", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -342,7 +335,7 @@ class EditorFragment : Fragment() {
         // Save crash recovery content
         val content = binding.editorView.text.toString()
         if (content.isNotEmpty()) {
-            FileHelper.saveCrashRecovery(context, content)
+            FileHelper.saveCrashRecovery(requireContext(), content)
         }
     }
 
