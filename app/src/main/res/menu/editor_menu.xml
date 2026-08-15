@@ -2,9 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_new"
+        android:icon="@drawable/ic_baseline_new_24"
+        android:title="New"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_open"
+        android:icon="@drawable/ic_baseline_open_in_browser_24"
+        android:title="Open"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_save"
         android:icon="@drawable/ic_baseline_save_24"
         android:title="Save"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_save_as"
+        android:icon="@drawable/ic_baseline_save_as_24"
+        android:title="Save As"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_versions"
