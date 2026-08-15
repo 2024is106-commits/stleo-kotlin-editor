@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.steo.codeeditor"
+    namespace = "com.steo.steotexteditor"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.steo.codeeditor"
+        applicationId = "com.steo.steotexteditor"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

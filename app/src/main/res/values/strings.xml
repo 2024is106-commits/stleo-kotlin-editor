@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">steotexteditor</string>
+    <string name="editor_title">Editor</string>
+    <string name="menu_recent_files">Recent files</string>
+    <string name="menu_version_history">Version history</string>
 </resources>

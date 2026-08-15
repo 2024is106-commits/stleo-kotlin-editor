@@ -1,5 +1,9 @@
 package com.steo.steotexteditor.data.db
 
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
+
 @Entity(
     tableName = "versions",
     foreignKeys = [ForeignKey(
@@ -13,7 +17,7 @@ data class VersionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val fileId: Long,
     val versionNumber: Int,
-    val label: String,           // e.g. "v1", "after refactor"
-    val patchText: String?,      // null only for version 1 (base)
+    val label: String,
+    val patchText: String?,   // null only for v1 (base version)
     val createdAt: Long = System.currentTimeMillis()
 )

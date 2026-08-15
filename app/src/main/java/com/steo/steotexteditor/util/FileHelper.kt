@@ -1,20 +1,43 @@
 package com.steo.steotexteditor.util
 
-@Database(entities = [FileEntity::class, VersionEntity::class], version = 1)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun fileDao(): FileDao
-    abstract fun versionDao(): VersionDao
+import android.content.Context
+import java.io.File
+import java.io.IOException
 
-    companion object {
-        @Volatile private var INSTANCE: AppDatabase? = null
+object FileHelper {
 
-        fun getInstance(context: Context): AppDatabase =
-            INSTANCE ?: synchronized(this) {
-                Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "steo_editor.db"
-                ).build().also { INSTANCE = it }
-            }
+    fun writeFile(path: String, content: String): Boolean {
+        return try {
+            File(path).writeText(content, Charsets.UTF_8)
+            true
+        } catch (e: IOException) {
+            false
+        }
+    }
+
+    fun readFile(path: String): String? {
+        return try {
+            File(path).readText(Charsets.UTF_8)
+        } catch (e: IOException) {
+            null
+        }
+    }
+
+    fun getStorageDir(context: Context): File {
+        val dir = File(context.filesDir, "steocode_files")
+        if (!dir.exists()) dir.mkdirs()
+        return dir
+    }
+
+    fun getCrashRecoveryFile(context: Context): File {
+        return File(context.cacheDir, "crash_recovery.tmp")
+    }
+
+    fun fileExists(path: String): Boolean {
+        return File(path).exists()
+    }
+
+    fun deleteFile(path: String): Boolean {
+        return File(path).delete()
     }
 }
