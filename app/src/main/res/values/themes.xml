@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Steotexteditor" parent="Theme.Material3.DayNight.NoActionBar">
@@ -11,14 +12,15 @@
         <item name="android:navigationBarColor">@color/deep_space_black</item>
         <item name="toolbarStyle">@style/Widget.Steotexteditor.Toolbar</item>
         <item name="actionOverflowButtonStyle">@style/Widget.Steotexteditor.Overflow</item>
-        <item name="android:popupMenuStyle">@style/Theme.Steotexteditor.Popup</item>
+        <item name="android:popupMenuStyle">@style/DarkPopupMenu</item>
+        <item name="android:actionOverflowMenuStyle">@style/DarkPopupMenu</item>
     </style>
 
     <style name="Widget.Steotexteditor.Toolbar" parent="Widget.Material3.Toolbar">
         <item name="android:background">@color/deep_space_black</item>
         <item name="titleTextColor">@color/text_off_white</item>
         <item name="android:theme">@style/ThemeOverlay.Steotexteditor.Toolbar</item>
-        <item name="popupTheme">@style/Theme.Steotexteditor.Popup</item>
+        <item name="popupTheme">@style/DarkPopupMenu</item>
     </style>
 
     <style name="ThemeOverlay.Steotexteditor.Toolbar" parent="ThemeOverlay.Material3.Dark">
@@ -45,4 +47,9 @@
     </style>
 
     <style name="Theme.Steotexteditor" parent="Base.Theme.Steotexteditor" />
+
+    <style name="DarkPopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@color/popup_menu_background</item>
+        <item name="android:textColor">@color/text_off_white</item>
+    </style>
 </resources>

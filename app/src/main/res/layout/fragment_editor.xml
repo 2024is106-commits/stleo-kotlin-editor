@@ -16,7 +16,7 @@
         app:navigationIcon="@drawable/ic_menu_close_clear_cancel"
         app:navigationIconTint="@color/icon_tint_soft_white"
         app:titleTextColor="@color/text_off_white"
-        app:popupTheme="@style/Theme.Steotexteditor.Popup"
+        app:popupTheme="@style/DarkPopupMenu"
         app:titleTextAppearance="@style/TextAppearance.Steotexteditor.ToolbarTitle"
         app:menu="@menu/editor_menu" />
 
