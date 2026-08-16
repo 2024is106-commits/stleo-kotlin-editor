@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_recent_files"
         android:title="@string/menu_recent_files"
         android:icon="@drawable/ic_baseline_history_24"
-        android:iconTint="@color/icon_tint_soft_white"
+        app:iconTint="@color/icon_tint_soft_white"
         android:textColor="@color/text_off_white" />
     <item
         android:id="@+id/menu_version_history"
         android:title="@string/menu_version_history"
         android:icon="@drawable/ic_baseline_history_24"
-        android:iconTint="@color/icon_tint_soft_white"
+        app:iconTint="@color/icon_tint_soft_white"
         android:textColor="@color/text_off_white" />
 </menu>

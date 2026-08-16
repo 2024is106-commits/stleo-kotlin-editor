@@ -12,8 +12,8 @@
         <item name="android:navigationBarColor">@color/deep_space_black</item>
         <item name="toolbarStyle">@style/Widget.Steotexteditor.Toolbar</item>
         <item name="actionOverflowButtonStyle">@style/Widget.Steotexteditor.Overflow</item>
+        <item name="actionOverflowMenuStyle">@style/DarkPopupMenu</item>
         <item name="android:popupMenuStyle">@style/DarkPopupMenu</item>
-        <item name="android:actionOverflowMenuStyle">@style/DarkPopupMenu</item>
     </style>
 
     <style name="Widget.Steotexteditor.Toolbar" parent="Widget.Material3.Toolbar">
@@ -49,7 +49,15 @@
     <style name="Theme.Steotexteditor" parent="Base.Theme.Steotexteditor" />
 
     <style name="DarkPopupMenu" parent="Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@color/popup_menu_background</item>
-        <item name="android:textColor">@color/text_off_white</item>
+        <item name="android:popupBackground">#1A1A2E</item>
+        <item name="android:textColor">#E8E8F0</item>
+    </style>
+
+    <!-- Splash theme used by SplashActivity -->
+    <style name="Theme.SteocodeApp.Splash" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">#000000</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
 </resources>

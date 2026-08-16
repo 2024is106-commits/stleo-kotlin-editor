@@ -33,6 +33,29 @@ object FileHelper {
         return File(context.cacheDir, "crash_recovery.tmp")
     }
 
+    fun saveCrashRecovery(context: Context, content: String) {
+        try {
+            getCrashRecoveryFile(context).writeText(content)
+        } catch (e: Exception) {}
+    }
+
+    fun readCrashRecovery(context: Context): String? {
+        val file = getCrashRecoveryFile(context)
+        return if (file.exists()) {
+            try {
+                file.readText()
+            } catch (e: Exception) {
+                null
+            }
+        } else null
+    }
+
+    fun clearCrashRecovery(context: Context) {
+        try {
+            getCrashRecoveryFile(context).delete()
+        } catch (e: Exception) {}
+    }
+
     fun fileExists(path: String): Boolean {
         return File(path).exists()
     }

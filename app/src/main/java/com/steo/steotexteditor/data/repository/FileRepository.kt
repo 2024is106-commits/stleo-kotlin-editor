@@ -8,6 +8,7 @@ import com.steo.steotexteditor.data.db.FileEntity
 import com.steo.steotexteditor.data.db.VersionEntity
 import com.steo.steotexteditor.util.FileHelper
 import android.content.Context
+import androidx.lifecycle.LiveData
 
 class FileRepository(private val context: Context) {
 
@@ -15,11 +16,15 @@ class FileRepository(private val context: Context) {
     private val fileDao = db.fileDao()
     private val versionDao = db.versionDao()
 
-    // ── File operations ──────────────────────────────────────────
+
 
     suspend fun getAllFiles(): List<FileEntity> = fileDao.getAllFiles()
 
+    fun getAllFilesLive(): LiveData<List<FileEntity>> = fileDao.getAllFilesLive()
+
     suspend fun getFileById(id: Long): FileEntity? = fileDao.getFileById(id)
+
+    suspend fun getFileByPath(path: String): FileEntity? = fileDao.getFileByPath(path)
 
     suspend fun setReadOnly(fileId: Long, readOnly: Boolean) {
         fileDao.setReadOnly(fileId, readOnly)

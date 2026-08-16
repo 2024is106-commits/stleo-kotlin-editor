@@ -51,6 +51,9 @@ dependencies {
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
 
+    // Lottie animation
+    implementation("com.airbnb.android:lottie:6.4.0")
+
     // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

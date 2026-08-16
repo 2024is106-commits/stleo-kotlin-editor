@@ -2,39 +2,27 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_new"
-        android:icon="@android:drawable/ic_menu_add"
-        app:iconTint="#DCDCF0"
-        android:title="New"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_open"
-        android:icon="@drawable/ic_baseline_open_in_browser_24"
-        app:iconTint="#DCDCF0"
-        android:title="Open"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/action_save"
-        android:icon="@android:drawable/ic_menu_save"
+        android:icon="@drawable/ic_baseline_save_24"
         app:iconTint="#DCDCF0"
         android:title="Save"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_save_as"
-        android:icon="@android:drawable/ic_menu_save"
+        android:icon="@drawable/ic_baseline_save_24"
         app:iconTint="#DCDCF0"
         android:title="Save As"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_versions"
-        android:icon="@android:drawable/ic_menu_recent_history"
+        android:icon="@drawable/ic_baseline_history_24"
         app:iconTint="#DCDCF0"
         android:title="Versions"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_delete"
         android:icon="@drawable/ic_baseline_delete_24"
         app:iconTint="#DCDCF0"
         android:title="Delete"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 </menu>

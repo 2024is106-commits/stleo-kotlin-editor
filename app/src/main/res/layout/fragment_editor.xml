@@ -4,24 +4,136 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/deep_space_black"
-    android:fitsSystemWindows="true">
+    android:background="@color/editor_canvas_dark">
 
-    <!-- Toolbar -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <!-- File Bar (White) -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/deep_space_black"
-        app:navigationIcon="@drawable/ic_menu_close_clear_cancel"
-        app:navigationIconTint="@color/icon_tint_soft_white"
-        app:titleTextColor="@color/text_off_white"
-        app:popupTheme="@style/DarkPopupMenu"
-        app:titleTextAppearance="@style/TextAppearance.Steotexteditor.ToolbarTitle"
-        app:menu="@menu/editor_menu" />
+        android:layout_height="56dp"
+        android:background="@color/editor_white"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
 
-    <!-- The actual text editor -->
-    <EditText
+        <ImageButton
+            android:id="@+id/btnNavToggle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_baseline_add_24"
+            app:tint="@color/button_save_black" />
+
+        <EditText
+            android:id="@+id/etFileName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:background="@android:color/transparent"
+            android:text="main.kt"
+            android:textColor="@color/button_save_black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:gravity="center_vertical" />
+
+        <View
+            android:id="@+id/statusDot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/cursor_drawable"
+            android:backgroundTint="@color/button_save_black" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:backgroundTint="@color/button_save_black"
+            android:text="SAVE"
+            android:textColor="@color/editor_white"
+            android:textSize="12sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginEnd="8dp"/>
+
+        <ImageButton
+            android:id="@+id/btnOverflow"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_baseline_more_vert_24"
+            app:tint="@color/button_save_black" />
+
+    </LinearLayout>
+
+    <!-- Quick Actions Bar (Dark) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#1A1A2E"
+        android:orientation="horizontal"
+        android:divider="?android:attr/dividerVertical"
+        android:showDividers="middle">
+
+        <ImageButton
+            android:id="@+id/btnUndoQuick"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_baseline_undo_24"
+            app:tint="@color/line_number_gray" />
+
+        <ImageButton
+            android:id="@+id/btnRedoQuick"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_baseline_redo_24"
+            app:tint="@color/line_number_gray" />
+
+        <TextView
+            android:id="@+id/btnSearchQuick"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="SEARCH"
+            android:textColor="@color/line_number_gray"
+            android:textSize="12sp"
+            android:padding="8dp" />
+
+        <TextView
+            android:id="@+id/btnVersionsQuick"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:gravity="center"
+            android:text="VERSIONS"
+            android:textColor="@color/text_off_white"
+            android:background="#3A3A5C"
+            android:textSize="12sp"
+            android:padding="8dp" />
+
+        <ImageButton
+            android:id="@+id/btnLockQuick"
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_baseline_save_24"
+            app:tint="@color/line_number_gray" />
+
+    </LinearLayout>
+
+    <include layout="@layout/layout_search_bar" />
+
+    <!-- The actual code editor with line numbers -->
+    <com.steo.steotexteditor.ui.view.CodeEditorView
         android:id="@+id/editorView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -30,7 +142,10 @@
         android:fontFamily="monospace"
         android:gravity="top|start"
         android:inputType="textMultiLine|textNoSuggestions"
-        android:padding="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="0dp"
         android:scrollbars="vertical"
         android:textColor="@color/text_off_white"
         android:textSize="14sp"

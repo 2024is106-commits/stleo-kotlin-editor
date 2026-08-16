@@ -5,15 +5,39 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.steo.steotexteditor.data.db.FileEntity
+import com.steo.steotexteditor.data.db.VersionEntity
 import com.steo.steotexteditor.data.repository.FileRepository
 import com.steo.steotexteditor.util.FileHelper
 import kotlinx.coroutines.launch
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 
 class EditorViewModel(application: Application) : AndroidViewModel(application) {
     
     private val fileRepository = FileRepository(application)
     private val context = application
+
+    // LiveData list of recent files observed from Room
+    val recentFiles: LiveData<List<FileEntity>> = fileRepository.getAllFilesLive()
+
+    private val _currentFile = MutableLiveData<FileEntity?>()
+    val currentFile: LiveData<FileEntity?> = _currentFile
+
+    fun setCurrentFile(file: FileEntity?) {
+        _currentFile.postValue(file)
+    }
     
+    suspend fun getVersionsForFile(fileId: Long): List<VersionEntity> {
+        return fileRepository.getVersionsForFile(fileId)
+    }
+
+    fun restoreVersion(fileId: Long, versionNumber: Int, onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val result = fileRepository.restoreVersion(fileId, versionNumber)
+            onComplete(result)
+        }
+    }
+
     fun loadFile(fileId: Long, onFileLoaded: (FileEntity?, String?) -> Unit) {
         viewModelScope.launch {
             val file = fileRepository.getFileById(fileId)

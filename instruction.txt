@@ -1,0 +1,13 @@
+Add full editor functionality to the existing Android project. Using the existing FileRepository, FileHelper, Room database, and the editor layout, implement the following in the EditorFragment (or MainActivity if that's where the editor lives):
+
+1. NEW FILE: Toolbar "New" button clears the EditText and resets current file state. If there are unsaved changes, show an AlertDialog asking to save first.
+
+2. OPEN FILE: Toolbar "Open" button opens a file picker using ActivityResultContracts.GetContent() with MIME type "*/*". Read the selected file content into the EditText. Store the file path and register it in the Room files table via FileRepository if not already present.
+
+3. SAVE: Toolbar "Save" button saves the current EditText content to disk using FileHelper. If this is the first save, create a base version via FileRepository.createVersion(). If the file already exists in the DB, create a diff-based version using FileRepository. Show a Toast "Saved" on success.
+
+4. SAVE AS: Toolbar "Save As" shows an AlertDialog with an EditText input for the new filename. Save to app internal storage under the given name. Register the new file in the Room files table and create a base version.
+
+5. Track unsaved changes by setting a boolean dirty flag whenever the EditText content changes (TextWatcher). Show an asterisk in the toolbar title when dirty.
+
+Use ViewBinding, follow MVVM — put business logic in a ViewModel that uses FileRepository. Keep all UI in the Fragment/Activity. Use existing dependencies only, do not add new ones.
