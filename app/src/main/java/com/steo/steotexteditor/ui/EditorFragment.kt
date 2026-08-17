@@ -48,6 +48,9 @@ import android.widget.TextView
 import com.steo.steotexteditor.ui.RecentFilesAdapter
 import java.util.Locale
 
+import android.view.MenuItem
+import io.noties.markwon.Markwon
+
 class EditorFragment : Fragment() {
 
     private var _binding: FragmentEditorBinding? = null
@@ -77,6 +80,11 @@ class EditorFragment : Fragment() {
     private val searchMatchRanges = mutableListOf<IntRange>()
     private var currentSearchMatchIndex = -1
     private var backPressCallback: OnBackPressedCallback? = null
+
+    // Markdown preview support
+    private var isPreviewMode = false
+    private var currentFileExtension: String = ""
+    private lateinit var markwon: Markwon
 
     private val openFileLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
@@ -113,15 +121,31 @@ class EditorFragment : Fragment() {
         setupTextWatcher()
         setupBackPressHandling()
         undoRedoManager = UndoRedoManager(binding.editorView)
+        // Initialize Markwon for Markdown preview (core only)
+        markwon = Markwon.builder(requireContext()).build()
+
         loadFile()
         
-        // Restore crash recovery content if available
+        checkCrashRecovery()
+    }
+
+    private fun checkCrashRecovery() {
         val crashRecoveryContent = FileHelper.readCrashRecovery(requireContext())
-        if (crashRecoveryContent != null) {
-            binding.editorView.setText(crashRecoveryContent)
-            isDirty = true
-            updateToolbarTitle()
-            FileHelper.clearCrashRecovery(requireContext())
+        if (!crashRecoveryContent.isNullOrEmpty()) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Recover Unsaved Work")
+                .setMessage("It looks like the app closed unexpectedly. Would you like to restore your unsaved content?")
+                .setPositiveButton("Restore") { _, _ ->
+                    binding.editorView.setText(crashRecoveryContent)
+                    isDirty = true
+                    updateToolbarTitle()
+                    FileHelper.clearCrashRecovery(requireContext())
+                }
+                .setNegativeButton("Discard") { _, _ ->
+                    FileHelper.clearCrashRecovery(requireContext())
+                }
+                .setCancelable(false)
+                .show()
         }
     }
 
@@ -246,14 +270,58 @@ class EditorFragment : Fragment() {
             saveFile()
         }
         
+        binding.btnSaveVersion.setOnClickListener {
+            // Prompt for optional label and create a version
+            val input = EditText(requireContext())
+            input.hint = "Optional label"
+            AlertDialog.Builder(requireContext())
+                .setTitle("Save Version")
+                .setView(input)
+                .setPositiveButton("Save") { _, _ ->
+                    val label = input.text.toString().takeIf { it.isNotBlank() }
+                    val file = currentFile ?: return@setPositiveButton
+                    val content = binding.editorView.text.toString()
+                    viewModel.createVersion(file, content, label) { fileId ->
+                        activity?.runOnUiThread {
+                            // Update currentFile/currentFileId when repository assigned an id (new file case)
+                            if (currentFile?.id == 0L && fileId > 0) {
+                                currentFile = currentFile?.copy(id = fileId)
+                                currentFileId = fileId
+                                viewModel.setCurrentFile(currentFile)
+                            } else {
+                                // existing file - ensure id is synced
+                                currentFileId = fileId
+                            }
+
+                            Toast.makeText(requireContext(), "Version saved", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
         binding.btnOverflow.setOnClickListener {
             val popup = androidx.appcompat.widget.PopupMenu(requireContext(), binding.btnOverflow)
             popup.menuInflater.inflate(R.menu.editor_menu, popup.menu)
+
+            // Show preview menu only for markdown files
+            val previewItem = popup.menu.findItem(R.id.action_preview)
+            previewItem?.isVisible = currentFileExtension == "md"
+            // tint icon if currently in preview mode
+            previewItem?.icon?.setTint(if (isPreviewMode) Color.parseColor("#7B2FBE") else Color.parseColor("#DCDCF0"))
+
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.action_save -> { saveFile(); true }
                     R.id.action_save_as -> { saveAsFile(); true }
-                    R.id.action_versions -> { showVersions(); true }
+                    R.id.action_versions -> {
+                        showVersions(); true
+                    }
+                    R.id.action_preview -> {
+                        togglePreview()
+                        true
+                    }
                     R.id.action_delete -> { deleteFile(); true }
                     else -> false
                 }
@@ -288,8 +356,7 @@ class EditorFragment : Fragment() {
             } else {
                 false
             }
-        }
-    }
+        }    }
 
     private fun setupTextWatcher() {
         binding.editorView.addTextChangedListener(object : TextWatcher {
@@ -300,6 +367,7 @@ class EditorFragment : Fragment() {
                     isDirty = true
                     updateToolbarTitle()
                 }
+                viewModel.editorContent.value = s?.toString() ?: ""
                 scheduleHighlighting()
             }
 
@@ -426,6 +494,7 @@ class EditorFragment : Fragment() {
                 isReadOnly = false
             )
             binding.editorView.setText("")
+            currentFileExtension = ""
             updateToolbarTitle()
             return
         }
@@ -436,6 +505,7 @@ class EditorFragment : Fragment() {
                     currentFile = file
                     binding.editorView.setText(content)
                     isDirty = false
+                    currentFileExtension = file.name.substringAfterLast('.', "").lowercase(Locale.getDefault())
                     updateToolbarTitle()
                 } else {
                     Toast.makeText(requireContext(), "File not found", Toast.LENGTH_SHORT).show()
@@ -524,6 +594,7 @@ class EditorFragment : Fragment() {
                     currentFileId = fileId
                     isDirty = false
                     updateToolbarTitle()
+                    FileHelper.clearCrashRecovery(requireContext())
                     Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -534,6 +605,7 @@ class EditorFragment : Fragment() {
                     currentFileId = fileId
                     isDirty = false
                     updateToolbarTitle()
+                    FileHelper.clearCrashRecovery(requireContext())
                     Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -558,6 +630,7 @@ class EditorFragment : Fragment() {
                             currentFileId = fileId
                             isDirty = false
                             updateToolbarTitle()
+                            FileHelper.clearCrashRecovery(requireContext())
                             Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -569,28 +642,44 @@ class EditorFragment : Fragment() {
 
     private fun showVersions() {
         val file = currentFile ?: return
-        viewLifecycleOwner.lifecycleScope.launch {
-            val versions = viewModel.getVersionsForFile(file.id)
-            if (versions.isEmpty()) {
-                Toast.makeText(requireContext(), "No versions available", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-            
-            val versionNumbers = versions.map { it.versionNumber.toString() }.toTypedArray()
-            AlertDialog.Builder(requireContext())
-                .setTitle("Select Version")
-                .setItems(versionNumbers.map { "Version $it" }.toTypedArray()) { _, which ->
-                    val selectedVersion = versions[which]
-                    viewModel.restoreVersion(file.id, selectedVersion.versionNumber) { success ->
-                        if (success) {
-                            loadFile()
-                            Toast.makeText(requireContext(), "Version restored", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(requireContext(), "Failed to restore version", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-                .show()
+        // Navigate to VersionsFragment passing file id
+        val bundle = android.os.Bundle()
+        bundle.putLong("file_id", file.id)
+        try {
+            val navController = androidx.navigation.Navigation.findNavController(requireView())
+            navController.navigate(R.id.versionsFragment, bundle)
+        } catch (e: Exception) {
+            // fallback: toast
+            Toast.makeText(requireContext(), "Unable to open versions", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun togglePreview() {
+        isPreviewMode = !isPreviewMode
+        val editor = binding.editorView
+        val previewScroll = binding.root.findViewById<android.widget.ScrollView>(R.id.scrollPreview)
+        val previewTv = binding.root.findViewById<TextView>(R.id.previewTextView)
+
+        if (isPreviewMode) {
+            // switch to preview
+            editor.visibility = View.GONE
+            previewScroll.visibility = View.VISIBLE
+            updatePreview()
+        } else {
+            // back to edit
+            previewScroll.visibility = View.GONE
+            editor.visibility = View.VISIBLE
+        }
+    }
+
+    private fun updatePreview() {
+        val previewTv = binding.root.findViewById<TextView>(R.id.previewTextView)
+        val content = binding.editorView.text?.toString() ?: ""
+        // Render markdown into previewTextView
+        try {
+            markwon.setMarkdown(previewTv, content)
+        } catch (_: Exception) {
+            previewTv.text = content
         }
     }
 
@@ -771,11 +860,6 @@ class EditorFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        // Save crash recovery content
-        val content = binding.editorView.text.toString()
-        if (content.isNotEmpty()) {
-            FileHelper.saveCrashRecovery(requireContext(), content)
-        }
     }
 
     override fun onDestroyView() {

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#05050A"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/tvVersionsTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Versions"
+        android:textSize="20sp"
+        android:textColor="#E8E8F0"
+        android:paddingBottom="8dp"
+        android:fontFamily="sans-serif-medium" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvVersions"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="ifContentScrolls" />
+
+</LinearLayout>

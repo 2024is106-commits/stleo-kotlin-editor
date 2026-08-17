@@ -27,6 +27,8 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 java-diff-utils = { group = "io.github.java-diff-utils", name = "java-diff-utils", version = "4.12" }
 markwon-core = { group = "io.noties.markwon", name = "core", version = "4.6.2" }
+markwon-html = { group = "io.noties.markwon", name = "html", version = "4.6.2" }
+markwon-ext-strikethrough = { group = "io.noties.markwon", name = "ext-strikethrough", version = "4.6.2" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitExt" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }

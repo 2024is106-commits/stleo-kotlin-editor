@@ -60,6 +60,19 @@
             android:paddingEnd="12dp"
             android:layout_marginEnd="8dp"/>
 
+        <!-- Save Version button -->
+        <Button
+            android:id="@+id/btnSaveVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:backgroundTint="#7B2FBE"
+            android:text="Save Version"
+            android:textColor="@color/editor_white"
+            android:textSize="12sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginEnd="8dp"/>
+
         <ImageButton
             android:id="@+id/btnOverflow"
             android:layout_width="48dp"
@@ -132,23 +145,51 @@
 
     <include layout="@layout/layout_search_bar" />
 
-    <!-- The actual code editor with line numbers -->
-    <com.steo.steotexteditor.ui.view.CodeEditorView
-        android:id="@+id/editorView"
+    <!-- The actual code editor with line numbers and preview -->
+    <LinearLayout
+        android:id="@+id/editor_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/editor_canvas_dark"
-        android:fontFamily="monospace"
-        android:gravity="top|start"
-        android:inputType="textMultiLine|textNoSuggestions"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="0dp"
-        android:scrollbars="vertical"
-        android:textColor="@color/text_off_white"
-        android:textSize="14sp"
-        android:textCursorDrawable="@drawable/cursor_drawable" />
+        android:orientation="vertical">
+
+        <com.steo.steotexteditor.ui.view.CodeEditorView
+            android:id="@+id/editorView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/editor_canvas_dark"
+            android:fontFamily="monospace"
+            android:gravity="top|start"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:paddingEnd="16dp"
+            android:paddingStart="0dp"
+            android:scrollbars="vertical"
+            android:textColor="@color/text_off_white"
+            android:textSize="14sp"
+            android:textCursorDrawable="@drawable/cursor_drawable" />
+
+        <ScrollView
+            android:id="@+id/scrollPreview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:background="#111118">
+
+            <TextView
+                android:id="@+id/previewTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:textColor="#E8E8F0"
+                android:textSize="15sp"
+                android:fontFamily="monospace" />
+
+        </ScrollView>
+
+    </LinearLayout>
 
 </LinearLayout>

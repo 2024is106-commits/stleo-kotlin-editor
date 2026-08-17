@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:layout_marginBottom="8dp"
+    android:background="#0A0A0F">
+
+    <TextView
+        android:id="@+id/tvBadge"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:layout_marginEnd="12dp"
+        android:textColor="#E8E8F0"
+        android:background="#7B2FBE"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:fontFamily="monospace" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#E8E8F0"
+            android:textSize="14sp"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:id="@+id/tvTimestamp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#A8A8AF"
+            android:textSize="12sp"
+            android:paddingTop="2dp"
+            android:fontFamily="monospace" />
+
+    </LinearLayout>
+
+</LinearLayout>

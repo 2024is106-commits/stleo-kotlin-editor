@@ -19,6 +19,14 @@
         app:iconTint="#DCDCF0"
         android:title="Versions"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_preview"
+        android:icon="@drawable/ic_baseline_preview_24"
+        app:iconTint="#DCDCF0"
+        android:title="Preview"
+        app:showAsAction="never" />
+
     <item
         android:id="@+id/action_delete"
         android:icon="@drawable/ic_baseline_delete_24"

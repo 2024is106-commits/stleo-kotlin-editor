@@ -64,6 +64,8 @@ dependencies {
 
     // Markdown
     implementation(libs.markwon.core)
+    implementation(libs.markwon.html)
+    implementation(libs.markwon.ext.strikethrough)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

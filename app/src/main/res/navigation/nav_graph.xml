@@ -9,4 +9,14 @@
         android:name="com.steo.steotexteditor.ui.EditorFragment"
         android:label="@string/editor_title"
         android:layout="@layout/fragment_editor" />
+
+    <fragment
+        android:id="@+id/versionsFragment"
+        android:name="com.steo.steotexteditor.ui.VersionsFragment"
+        android:label="@string/versions_title"
+        android:layout="@layout/fragment_versions">
+        <argument
+            android:name="file_id"
+            app:argType="long" />
+    </fragment>
 </navigation>

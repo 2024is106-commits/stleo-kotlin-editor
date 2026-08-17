@@ -8,7 +8,10 @@ import com.steo.steotexteditor.data.db.FileEntity
 import com.steo.steotexteditor.data.db.VersionEntity
 import com.steo.steotexteditor.data.repository.FileRepository
 import com.steo.steotexteditor.util.FileHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
@@ -16,6 +19,26 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
     
     private val fileRepository = FileRepository(application)
     private val context = application
+
+    val editorContent = MutableLiveData<String>()
+
+    init {
+        startAutoSave()
+    }
+
+    private fun startAutoSave() {
+        viewModelScope.launch {
+            while (true) {
+                delay(10000L)
+                val content = editorContent.value
+                if (content != null) {
+                    withContext(Dispatchers.IO) {
+                        FileHelper.saveCrashRecovery(context, content)
+                    }
+                }
+            }
+        }
+    }
 
     // LiveData list of recent files observed from Room
     val recentFiles: LiveData<List<FileEntity>> = fileRepository.getAllFilesLive()
@@ -36,6 +59,21 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
             val result = fileRepository.restoreVersion(fileId, versionNumber)
             onComplete(result)
         }
+    }
+
+    /**
+     * Create a named snapshot (version) for an existing file.
+     */
+    fun createVersion(file: FileEntity, content: String, label: String?, onComplete: (Long) -> Unit) {
+        viewModelScope.launch {
+            val l = label ?: "Snapshot"
+            val fileId = fileRepository.saveFileWithVersion(file, content, l)
+            onComplete(fileId)
+        }
+    }
+
+    suspend fun getDiffBetweenVersions(fileId: Long, fromVersion: Int, toVersion: Int): List<String> {
+        return fileRepository.getDiffBetweenVersions(fileId, fromVersion, toVersion)
     }
 
     fun loadFile(fileId: Long, onFileLoaded: (FileEntity?, String?) -> Unit) {
