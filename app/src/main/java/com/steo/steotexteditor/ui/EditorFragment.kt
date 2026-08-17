@@ -281,22 +281,45 @@ class EditorFragment : Fragment() {
                     val label = input.text.toString().takeIf { it.isNotBlank() }
                     val file = currentFile ?: return@setPositiveButton
                     val content = binding.editorView.text.toString()
-                    viewModel.createVersion(file, content, label) { fileId ->
-                        activity?.runOnUiThread {
-                            // Update currentFile/currentFileId when repository assigned an id (new file case)
-                            if (currentFile?.id == 0L && fileId > 0) {
-                                currentFile = currentFile?.copy(id = fileId)
-                                currentFileId = fileId
-                                viewModel.setCurrentFile(currentFile)
-                            } else {
-                                // existing file - ensure id is synced
-                                currentFileId = fileId
-                            }
 
-                            Toast.makeText(requireContext(), "Version saved", Toast.LENGTH_SHORT).show()
+                                    // Check for changes compared to latest saved version
+                                    viewLifecycleOwner.lifecycleScope.launch {
+                                        var isSame = false
+                                        if (file.id != 0L) {
+                                            val versions = viewModel.getVersionsForFile(file.id)
+                                            val latest = versions.maxOfOrNull { it.versionNumber } ?: 0
+                                            if (latest > 0) {
+                                                val prev = viewModel.reconstructVersion(file.id, latest)
+                                                if (prev != null && prev == content) {
+                                                    isSame = true
+                                                }
+                                            }
                         }
-                    }
-                }
+
+                                        if (isSame) {
+                                            activity?.runOnUiThread {
+                                                Toast.makeText(requireContext(), "No changes to save", Toast.LENGTH_SHORT).show()
+                                            }
+                                            return@launch
+                                        }
+
+                                        viewModel.createVersion(file, content, label) { fileId ->
+                                            activity?.runOnUiThread {
+                                                // Update currentFile/currentFileId when repository assigned an id (new file case)
+                                                if (currentFile?.id == 0L && fileId > 0) {
+                                                    currentFile = currentFile?.copy(id = fileId)
+                                                    currentFileId = fileId
+                                                    viewModel.setCurrentFile(currentFile)
+                                                } else {
+                                                    // existing file - ensure id is synced
+                                                    currentFileId = fileId
+                                                }
+
+                                                Toast.makeText(requireContext(), "Version saved", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }
+                                }
                 .setNegativeButton("Cancel", null)
                 .show()
         }

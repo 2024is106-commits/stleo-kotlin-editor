@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/editor_canvas_dark">
+    android:background="@color/editor_canvas_dark"
+    android:paddingBottom="56dp"
+    android:clipToPadding="false">
 
     <!-- File Bar (White) -->
     <LinearLayout

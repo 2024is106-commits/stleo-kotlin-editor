@@ -76,6 +76,10 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
         return fileRepository.getDiffBetweenVersions(fileId, fromVersion, toVersion)
     }
 
+    suspend fun reconstructVersion(fileId: Long, versionNumber: Int): String? {
+        return fileRepository.reconstructVersion(fileId, versionNumber)
+    }
+
     fun loadFile(fileId: Long, onFileLoaded: (FileEntity?, String?) -> Unit) {
         viewModelScope.launch {
             val file = fileRepository.getFileById(fileId)

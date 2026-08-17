@@ -2,13 +2,33 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/editorFragment">
+    app:startDestination="@id/nav_edit">
 
     <fragment
-        android:id="@+id/editorFragment"
+        android:id="@+id/nav_edit"
         android:name="com.steo.steotexteditor.ui.EditorFragment"
         android:label="@string/editor_title"
         android:layout="@layout/fragment_editor" />
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.steo.steotexteditor.ui.HomeFragment"
+        android:label="Home" />
+
+    <fragment
+        android:id="@+id/nav_run"
+        android:name="com.steo.steotexteditor.ui.RunFragment"
+        android:label="Run" />
+
+    <fragment
+        android:id="@+id/nav_logs"
+        android:name="com.steo.steotexteditor.ui.LogsFragment"
+        android:label="Logs" />
+
+    <fragment
+        android:id="@+id/nav_diff"
+        android:name="com.steo.steotexteditor.ui.DiffFragment"
+        android:label="Diff" />
 
     <fragment
         android:id="@+id/versionsFragment"
