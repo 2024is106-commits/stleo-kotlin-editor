@@ -12,7 +12,6 @@ class LogsFragment : Fragment() {
         val tv = TextView(requireContext())
         tv.text = "Logs Fragment Placeholder"
         tv.gravity = android.view.Gravity.CENTER
-        tv.setPadding(0, 0, 0, (56 * resources.displayMetrics.density).toInt())
         return tv
     }
 }

@@ -611,16 +611,8 @@ class EditorFragment : Fragment() {
         val file = currentFile ?: return
         
         if (file.id == 0L) {
-            // New file - create it
-            viewModel.createNewFile(file.name, content) { fileId ->
-                activity?.runOnUiThread {
-                    currentFileId = fileId
-                    isDirty = false
-                    updateToolbarTitle()
-                    FileHelper.clearCrashRecovery(requireContext())
-                    Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
-                }
-            }
+            // New file - prompt for filename
+            saveAsFile()
         } else {
             // Existing file - save with version
             viewModel.saveFile(file, content) { fileId ->
@@ -646,8 +638,13 @@ class EditorFragment : Fragment() {
             .setMessage("Enter file name:")
             .setView(input)
             .setPositiveButton("Save") { dialog, _ ->
-                val fileName = input.text.toString()
+                var fileName = input.text.toString()
                 if (fileName.isNotEmpty()) {
+                    // If no extension, append .txt
+                    if (!fileName.contains(".")) {
+                        fileName += ".txt"
+                    }
+
                     viewModel.createNewFile(fileName, content) { fileId ->
                         activity?.runOnUiThread {
                             currentFileId = fileId
