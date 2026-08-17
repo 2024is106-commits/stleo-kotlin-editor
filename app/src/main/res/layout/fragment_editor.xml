@@ -9,7 +9,7 @@
     <!-- File Bar (White) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:background="@color/editor_white"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -86,7 +86,7 @@
     <!-- Quick Actions Bar (Dark) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:background="#1A1A2E"
         android:orientation="horizontal"
         android:divider="?android:attr/dividerVertical"
@@ -95,7 +95,7 @@
         <ImageButton
             android:id="@+id/btnUndoQuick"
             android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_baseline_undo_24"
@@ -104,7 +104,7 @@
         <ImageButton
             android:id="@+id/btnRedoQuick"
             android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_baseline_redo_24"
@@ -113,7 +113,7 @@
         <TextView
             android:id="@+id/btnSearchQuick"
             android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:text="SEARCH"
@@ -124,7 +124,7 @@
         <TextView
             android:id="@+id/btnVersionsQuick"
             android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
             android:layout_weight="1.2"
             android:gravity="center"
             android:text="VERSIONS"
@@ -136,7 +136,7 @@
         <ImageButton
             android:id="@+id/btnLockQuick"
             android:layout_width="48dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_baseline_save_24"
             app:tint="@color/line_number_gray" />
@@ -163,7 +163,6 @@
             android:gravity="top|start"
             android:inputType="textMultiLine|textNoSuggestions"
             android:paddingTop="16dp"
-            android:paddingBottom="16dp"
             android:paddingEnd="16dp"
             android:paddingStart="0dp"
             android:scrollbars="vertical"

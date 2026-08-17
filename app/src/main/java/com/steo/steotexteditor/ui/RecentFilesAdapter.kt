@@ -29,14 +29,9 @@ class RecentFilesAdapter(
     override fun onBindViewHolder(holder: VH, position: Int) {
         val file = items[position]
         holder.tvFileName.text = file.name
-        // Badge: determine extension
-        val ext = file.name.substringAfterLast('.', "").lowercase(Locale.getDefault())
-        val badge = when (ext) {
-            "kt" -> "KT"
-            "md" -> "MD"
-            else -> if (ext.isNotEmpty()) ext.take(2).uppercase(Locale.getDefault()) else "•"
-        }
-        holder.tvBadge.text = badge
+        
+        val ext = file.name.substringAfterLast('.', "").uppercase(Locale.getDefault())
+        holder.tvBadge.text = if (ext.isNotEmpty()) ".$ext" else ""
 
         holder.tvRelativeTime.text = formatRelativeTime(file.lastModified)
 
@@ -64,6 +59,6 @@ class RecentFilesAdapter(
         val minutes = TimeUnit.MILLISECONDS.toMinutes(diff)
         if (minutes > 0) return "${minutes}M AGO"
         val seconds = TimeUnit.MILLISECONDS.toSeconds(diff)
-        return "${seconds}s AGO"
+        return "${seconds}S AGO"
     }
 }

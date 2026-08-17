@@ -24,6 +24,11 @@
         <activity
             android:name=".ui.MainActivity"
             android:exported="false" />
+
+        <!-- Added to fix ActivityNotFoundException: SetupActivity started from SplashActivity -->
+        <activity
+            android:name=".ui.SetupActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

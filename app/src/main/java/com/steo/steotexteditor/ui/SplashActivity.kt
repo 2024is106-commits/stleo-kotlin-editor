@@ -14,9 +14,16 @@ class SplashActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_splash)
 
-        // Simple timed splash then open MainActivity
+        // Simple timed splash then open Setup or Main
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
+            val prefs = getSharedPreferences("steo_prefs", MODE_PRIVATE)
+            val coderName = prefs.getString("coder_name", null)
+            
+            if (coderName == null) {
+                startActivity(Intent(this, SetupActivity::class.java))
+            } else {
+                startActivity(Intent(this, MainActivity::class.java))
+            }
             finish()
         }, 800)
     }

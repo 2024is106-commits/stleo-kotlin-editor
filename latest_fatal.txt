@@ -1,0 +1,54 @@
+> logcat_dump.txt:1773:08-17 18:40:41.822 11756 11756 E AndroidRuntime: FATAL EXCEPTION: main
+> logcat_dump.txt:1774:08-17 18:40:41.822 11756 11756 E AndroidRuntime: Process: com.steo.steotexteditor, PID: 11756
+> logcat_dump.txt:1775:08-17 18:40:41.822 11756 11756 E AndroidRuntime: android.content.ActivityNotFoundException: Unable to find explicit activity class {com.steo.steotexteditor/com.steo.steotexteditor.ui.SetupActivity}; have you declared this activity in your AndroidManifest.xml?
+> logcat_dump.txt:1776:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at android.app.Instrumentation.checkStartActivityResult(Instrumentation.java:2065)
+> logcat_dump.txt:1777:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at android.app.Instrumentation.execStartActivity(Instrumentation.java:1727)
+> logcat_dump.txt:1778:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at android.app.Activity.startActivityForResult(Activity.java:5320)
+> logcat_dump.txt:1779:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at androidx.activity.ComponentActivity.startActivityForResult(ComponentActivity.kt:675)
+> logcat_dump.txt:1780:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at android.app.Activity.startActivityForResult(Activity.java:5278)
+> logcat_dump.txt:1781:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at androidx.activity.ComponentActivity.startActivityForResult(ComponentActivity.kt:660)
+> logcat_dump.txt:1782:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at android.app.Activity.startActivity(Activity.java:5664)
+> logcat_dump.txt:1783:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at android.app.Activity.startActivity(Activity.java:5617)
+> logcat_dump.txt:1784:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at com.steo.steotexteditor.ui.SplashActivity.onCreate$lambda$0(SplashActivity.kt:23)
+> logcat_dump.txt:1785:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at com.steo.steotexteditor.ui.SplashActivity.$r8$lambda$1MnYT_NGijPLfD_JNrc2cNB6QWA(Unknown Source:0)
+> logcat_dump.txt:1786:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at com.steo.steotexteditor.ui.SplashActivity$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+> logcat_dump.txt:1787:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at android.os.Handler.handleCallback(Handler.java:938)
+> logcat_dump.txt:1788:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+> logcat_dump.txt:1789:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:227)
+> logcat_dump.txt:1790:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:7700)
+> logcat_dump.txt:1791:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+> logcat_dump.txt:1792:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:612)
+> logcat_dump.txt:1793:08-17 18:40:41.822 11756 11756 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:997)
+  logcat_dump.txt:1794:08-17 18:40:41.827  1231 11797 I DropBoxManagerService: add tag=data_app_crash isTagEnabled=true flags=0x2
+> logcat_dump.txt:1795:08-17 18:40:41.828  1231  1244 W ActivityTaskManager:   Force finishing activity com.steo.steotexteditor/.ui.SplashActivity
+> logcat_dump.txt:1796:08-17 18:40:41.830  1231  1244 W WindowManager: Changing focus fromWindow{1f33767 u0 com.steo.steotexteditor/com.steo.steotexteditor.ui.SplashActivity} to null displayId=0 Callers=com.android.server.wm.RootWindowContainer.updateFocusedWindowLocked:456 com.android.server.wm.WindowManagerService.updateFocusedWindowLocked:5645 com.android.server.wm.DisplayContent.setFocusedApp:5639 com.android.server.wm.ActivityTaskManagerService.setResumedActivityUncheckLocked:5519 
+  logcat_dump.txt:1797:08-17 18:40:41.846  1231  1258 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+> logcat_dump.txt:1798:08-17 18:40:41.937  1231  1249 W WindowManager: Changing focus fromnull to Window{5fbbf6c u0 Application Error: com.steo.steotexteditor} displayId=0 Callers=com.android.server.wm.RootWindowContainer.updateFocusedWindowLocked:456 com.android.server.wm.WindowManagerService.updateFocusedWindowLocked:5645 com.android.server.wm.WindowManagerService.addWindow:1727 com.android.server.wm.Session.addToDisplayAsUser:176 
+  logcat_dump.txt:1799:08-17 18:40:42.051  1231  1231 W Looper  : Slow dispatch took 191ms main h=com.android.server.job.JobSchedulerService$JobHandler c=null m=1
+> logcat_dump.txt:1800:08-17 18:40:42.329  1231  1251 W ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{1192e0b u0 com.steo.steotexteditor/.ui.SplashActivity t213 f}}
+> logcat_dump.txt:1801:08-17 18:40:42.341  1231  1251 W ActivityTaskManager: Activity pause timeout for ActivityRecord{1192e0b u0 com.steo.steotexteditor/.ui.SplashActivity t213 f}}
+  logcat_dump.txt:1802:08-17 18:40:42.380  1231  1583 I WindowManager: Relayout Window{1392a17 u0 com.nttdocomo.android.homezozo/com.android.launcher3.Launcher}: oldVis=4 newVis=0 focusMayChange = true
+> logcat_dump.txt:1803:08-17 18:40:45.703  1231  1244 W WindowManager:   Force finishing activity com.steo.steotexteditor/.ui.SplashActivity
+> logcat_dump.txt:1804:08-17 18:40:45.724  1231  1249 W WindowManager: Changing focus fromWindow{5fbbf6c u0 Application Error: com.steo.steotexteditor EXITING} to Window{1392a17 u0 com.nttdocomo.android.homezozo/com.android.launcher3.Launcher} displayId=0 Callers=com.android.server.wm.RootWindowContainer.updateFocusedWindowLocked:456 com.android.server.wm.WindowManagerService.updateFocusedWindowLocked:5645 com.android.server.wm.WindowState.setupWindowForRemoveOnExit:2380 com.android.server.wm.WindowState.removeIfPossible:2349 
+> logcat_dump.txt:1805:08-17 18:40:45.738  1231  1244 I ActivityManager: Killing 11756:com.steo.steotexteditor/u0a337 (adj 900): crash
+  logcat_dump.txt:1806:08-17 18:40:45.791  1231  1251 W ActivityManager: setHasOverlayUi called on unknown pid: 11756
+  logcat_dump.txt:1807:08-17 18:41:07.809  1231  4369 I PowerManagerService: Going to sleep due to lid_switch (uid 10240)...
+  logcat_dump.txt:1808:08-17 18:41:07.813  1231  4369 I PowerManagerService: Sleeping (uid 10240)...
+  logcat_dump.txt:1809:08-17 18:41:07.892  1231  1274 V SettingsProvider: name : screen_brightness_float appId : 1000
+  logcat_dump.txt:1810:08-17 18:41:08.029  1231  1274 I DisplayPowerController: Blocking screen off
+  logcat_dump.txt:1811:08-17 18:41:08.030  1231  1274 I DisplayPowerController: Unblocked screen off after 1 ms
+  logcat_dump.txt:1812:08-17 18:41:08.115  1231  1274 D ActivityTaskManager: Top Process State changed to PROCESS_STATE_TOP_SLEEPING
+  logcat_dump.txt:1813:08-17 18:41:08.123  1231  1265 E KernelCpuSpeedReader: Failed to read cpu-freq: /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state: open failed: ENOENT (No such file or directory)
+  logcat_dump.txt:1814:08-17 18:41:08.124  1231  1265 E KernelCpuSpeedReader: Failed to read cpu-freq: /sys/devices/system/cpu/cpu4/cpufreq/stats/time_in_state: open failed: ENOENT (No such file or directory)
+  logcat_dump.txt:1815:08-17 18:41:08.170  1231  1274 D WindowOrientationListener: WindowOrientationListener disabled
+  logcat_dump.txt:1816:08-17 18:41:08.186  1231  1251 W WindowManager: Changing focus fromWindow{1392a17 u0 com.nttdocomo.android.homezozo/com.android.launcher3.Launcher} to null displayId=0 Callers=com.android.server.wm.RootWindowContainer.updateFocusedWindowLocked:456 com.android.server.wm.WindowManagerService.updateFocusedWindowLocked:5645 com.android.server.wm.ActivityRecord.commitVisibility:4307 com.android.server.wm.ActivityRecord.setVisibility:4249 
+  logcat_dump.txt:1817:08-17 18:41:08.195  1231  1274 V DisplayPowerController: Brightness [-1.0] reason changing to: 'screen_off', previous reason: 'automatic [ low_pwr ]'.
+  logcat_dump.txt:1818:08-17 18:41:08.208  1231  1251 I DisplayManagerService: Display device changed state: "Built-in Screen", OFF
+  logcat_dump.txt:1819:08-17 18:41:08.211  1231  1258 I DropBoxManagerService: add tag=system_server_wtf isTagEnabled=true flags=0x2
+  logcat_dump.txt:1820:08-17 18:41:08.366  1231  1231 W Looper  : Slow dispatch took 185ms main h=com.android.server.job.JobSchedulerService$JobHandler c=null m=1
+  logcat_dump.txt:1821:08-17 18:41:08.546  1231  1258 W BroadcastQueue: Appop Denial: receiving Intent { flg=0x10 cmp=com.sonymobile.android.dialer/com.android.dialer.location.CountryDetector$LocationChangedReceiver (has extras) } to com.sonymobile.android.dialer/com.android.dialer.location.CountryDetector$LocationChangedReceiver requires appop android:fine_location due to sender com.sonymobile.android.dialer (uid 10126)
+  logcat_dump.txt:1822:08-17 18:41:08.729  1231  4369 I ActivityTaskManager: moveTaskToBack: Task{5da7019 #57 visible=true type=recents mode=fullscreen translucent=false I=com.sonymobile.launcher/com.android.quickstep.RecentsActivity U=0 StackId=56 sz=1}
+  logcat_dump.txt:1823:08-17 18:41:10.226  1231  1258 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+  logcat_dump.txt:1824:08-17 18:41:14.045  1231  1265 E KernelCpuSpeedReader: Failed to read cpu-freq: /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state: open failed: ENOENT (No such file or directory)
+  logcat_dump.txt:1825:08-17 18:41:14.046  1231  1265 E KernelCpuSpeedReader: Failed to read cpu-freq: /sys/devices/system/cpu/cpu4/cpufreq/stats/time_in_state: open failed: ENOENT (No such file or directory)
+

@@ -674,7 +674,93 @@ class EditorFragment : Fragment() {
         }
     }
 
-    private fun togglePreview() {
+    // Called from MainActivity when bottom Run button is pressed
+    fun handleRunAction() {
+        val content = binding.editorView.text.toString()
+        // If file not saved yet, ask for name and save as .md
+        if (currentFile == null || currentFile?.id == 0L) {
+            val input = EditText(requireContext())
+            input.setText(currentFile?.name ?: "untitled.md")
+            AlertDialog.Builder(requireContext())
+                .setTitle("Save file before running")
+                .setMessage("Enter filename (will be saved as Markdown .md):")
+                .setView(input)
+                .setPositiveButton("Save") { _, _ ->
+                    var name = input.text.toString().ifBlank { "untitled.md" }
+                    if (!name.endsWith(".md")) name += ".md"
+                    viewModel.createNewFile(name, content) { fileId ->
+                        activity?.runOnUiThread {
+                            currentFileId = fileId
+                            viewModel.loadFile(fileId) { f, c ->
+                                activity?.runOnUiThread {
+                                    if (f != null) {
+                                        currentFile = f
+                                        binding.editorView.setText(c ?: "")
+                                        isDirty = false
+                                        updateToolbarTitle()
+                                        // show preview
+                                        if (f.name.lowercase(Locale.getDefault()).endsWith(".md")) {
+                                            if (!isPreviewMode) togglePreview()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+            return
+        }
+
+        // If file exists but has unsaved changes, prompt to save
+        if (isDirty) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Save changes?")
+                .setMessage("Save changes before running preview?")
+                .setPositiveButton("Save") { _, _ ->
+                    // call viewModel.saveFile directly so we can act on completion
+                    val file = currentFile ?: return@setPositiveButton
+                    val contentToSave = binding.editorView.text.toString()
+                    viewModel.saveFile(file, contentToSave) { fileId ->
+                        activity?.runOnUiThread {
+                            currentFileId = fileId
+                            // reload file metadata
+                            viewModel.loadFile(fileId) { f, c ->
+                                activity?.runOnUiThread {
+                                    if (f != null) {
+                                        currentFile = f
+                                        binding.editorView.setText(c ?: "")
+                                        isDirty = false
+                                        updateToolbarTitle()
+                                        val ext2 = f.name.substringAfterLast('.').lowercase(Locale.getDefault())
+                                        if (ext2 == "md") {
+                                            if (!isPreviewMode) togglePreview()
+                                        } else {
+                                            Toast.makeText(requireContext(), "Preview available only for Markdown files", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+            return
+        }
+
+        // No unsaved changes; just show preview if file is Markdown
+        val ext = currentFile?.name?.substringAfterLast('.')?.lowercase(Locale.getDefault()) ?: ""
+        if (ext == "md") {
+            if (!isPreviewMode) togglePreview()
+        } else {
+            Toast.makeText(requireContext(), "Preview available only for Markdown files", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Make togglePreview public so MainActivity can trigger preview display
+    fun togglePreview() {
         isPreviewMode = !isPreviewMode
         val editor = binding.editorView
         val previewScroll = binding.root.findViewById<android.widget.ScrollView>(R.id.scrollPreview)

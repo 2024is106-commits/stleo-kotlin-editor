@@ -39,12 +39,13 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
+                    android:id="@+id/tvProfileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="LEON"
                     android:textColor="@color/text_off_white"
                     android:textSize="14sp"
-                    android:fontFamily="monospace"
+                    android:fontFamily="@font/silkscreen"
                     android:layout_marginEnd="8dp" />
 
                 <ImageView
