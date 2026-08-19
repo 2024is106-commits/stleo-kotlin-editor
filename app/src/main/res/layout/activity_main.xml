@@ -16,15 +16,19 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/profileBar"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp"
             android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:paddingEnd="16dp"
+            android:background="@color/action_bar_dark">
 
             <ImageView
                 android:layout_width="120dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_logo"
                 android:contentDescription="STEOCODE"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="14dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -39,21 +43,25 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
+                    android:id="@+id/tvReadOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/read_only"
+                    android:textColor="#FF5252"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/silkscreen"
+                    android:layout_marginEnd="8dp"
+                    android:visibility="gone" />
+
+                <TextView
                     android:id="@+id/tvProfileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="LEON"
                     android:textColor="@color/text_off_white"
                     android:textSize="14sp"
-                    android:fontFamily="@font/silkscreen"
-                    android:layout_marginEnd="8dp" />
-
-                <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/ic_baseline_preview_24"
-                    app:tint="@color/text_off_white"
-                    android:contentDescription="Profile" />
+                    android:fontFamily="@font/silkscreen" />
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

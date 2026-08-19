@@ -138,7 +138,7 @@
             android:layout_width="48dp"
                         android:layout_height="match_parent"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_baseline_save_24"
+            android:src="@drawable/ic_baseline_preview_24"
             app:tint="@color/line_number_gray" />
 
     </LinearLayout>

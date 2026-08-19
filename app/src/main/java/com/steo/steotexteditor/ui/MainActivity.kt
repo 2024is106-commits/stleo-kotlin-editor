@@ -2,8 +2,10 @@ package com.steo.steotexteditor.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -13,6 +15,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.steo.steotexteditor.R
 
 class MainActivity : AppCompatActivity() {
+    private val viewModel: EditorViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -25,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setupWithNavController(navController)
 
         updateUserInfo()
+        setupObservers()
 
         // Intercept Run button to trigger preview/save flow
         bottomNav.setOnItemSelectedListener { item ->
@@ -46,10 +51,24 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawerLayout)) { v, insets ->
+        val profileBar = findViewById<View>(R.id.profileBar)
+        ViewCompat.setOnApplyWindowInsetsListener(profileBar) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            v.setPadding(v.paddingStart, systemBars.top, v.paddingEnd, v.paddingBottom)
             insets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, systemBars.bottom)
+            insets
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.currentFile.observe(this) { file ->
+            val tvReadOnly = findViewById<TextView>(R.id.tvReadOnly)
+            tvReadOnly?.visibility = if (file?.isReadOnly == true) View.VISIBLE else View.GONE
         }
     }
 

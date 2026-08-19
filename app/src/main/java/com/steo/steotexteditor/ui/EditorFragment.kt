@@ -56,7 +56,7 @@ class EditorFragment : Fragment() {
     private var _binding: FragmentEditorBinding? = null
     private val binding get() = _binding!!
     
-    private val viewModel: EditorViewModel by viewModels()
+    private val viewModel: EditorViewModel by viewModels({ requireActivity() })
     private var currentFile: FileEntity? = null
     private var currentFileId: Long = -1
     private var isDirty = false
@@ -363,6 +363,7 @@ class EditorFragment : Fragment() {
                 val color = if (newState) Color.parseColor("#7B2FBE") else Color.parseColor("#5A5A7A")
                 binding.btnLockQuick.setColorFilter(color)
                 currentFile = it.copy(isReadOnly = newState)
+                updateToolbarTitle()
             }
         }
 
@@ -417,7 +418,7 @@ class EditorFragment : Fragment() {
                 SyntaxType.KOTLIN -> kotlinSyntaxHighlighter.buildSpans(sourceText)
             }
 
-            withContext(Dispatchers.Main) {
+            withContext(Dispatchers.Main) {  
                 if (_binding == null) return@withContext
                 val editable = binding.editorView.text ?: return@withContext
 
@@ -504,6 +505,7 @@ class EditorFragment : Fragment() {
             binding.etFileName.setText(displayTitle)
         }
         binding.statusDot.visibility = if (isDirty) View.VISIBLE else View.INVISIBLE
+        viewModel.setCurrentFile(currentFile)
     }
 
     private fun loadFile() {
