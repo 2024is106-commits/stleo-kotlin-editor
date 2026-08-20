@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.steo.steotexteditor.R
@@ -13,6 +15,12 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_splash)
+
+        findViewById<TextView>(R.id.tvSplashLogo)?.animate()
+            ?.alpha(1f)
+            ?.setDuration(650L)
+            ?.setInterpolator(AccelerateDecelerateInterpolator())
+            ?.start()
 
         // Simple timed splash then open Setup or Main
         Handler(Looper.getMainLooper()).postDelayed({

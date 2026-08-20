@@ -95,6 +95,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
                 id = 0,
                 name = name,
                 path = path,
+                fileType = name.substringAfterLast('.', "txt").lowercase(),
                 lastModified = System.currentTimeMillis(),
                 isReadOnly = false
             )
@@ -120,6 +121,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
                         id = 0,
                         name = fileName,
                         path = path,
+                        fileType = fileName.substringAfterLast('.', "txt").lowercase(),
                         lastModified = System.currentTimeMillis(),
                         isReadOnly = false
                     )

@@ -82,6 +82,7 @@ class EditorFragment : Fragment() {
     // Markdown preview support
     private var isPreviewMode = false
     private var currentFileExtension: String = ""
+    private var pendingNewFileExtension: String = "kt"
     private lateinit var markwon: Markwon
 
     private val openFileLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -92,8 +93,10 @@ class EditorFragment : Fragment() {
                         currentFile = file
                         currentFileId = file.id
                         binding.editorView.setText(content)
+                        currentFileExtension = file.name.substringAfterLast('.', "").lowercase(Locale.getDefault())
                         isDirty = false
                         updateToolbarTitle()
+                        scheduleHighlighting()
                     } else {
                         Toast.makeText(requireContext(), "Failed to open file", Toast.LENGTH_SHORT).show()
                     }
@@ -112,6 +115,7 @@ class EditorFragment : Fragment() {
         
         // Get file ID from arguments
         currentFileId = arguments?.getLong("file_id") ?: -1
+        pendingNewFileExtension = arguments?.getString("file_extension") ?: "kt"
         
         setupDrawer()
         setupSearchBar()
@@ -364,6 +368,7 @@ class EditorFragment : Fragment() {
             val spans = when (syntaxType) {
                 SyntaxType.MARKDOWN -> markdownSyntaxHighlighter.buildSpans(sourceText)
                 SyntaxType.KOTLIN -> kotlinSyntaxHighlighter.buildSpans(sourceText)
+                SyntaxType.PLAIN_TEXT -> emptyList()
             }
 
             withContext(Dispatchers.Main) {  
@@ -385,6 +390,7 @@ class EditorFragment : Fragment() {
         val fileName = currentFile?.name?.lowercase().orEmpty()
         return when {
             fileName.endsWith(".md") -> SyntaxType.MARKDOWN
+            fileName.endsWith(".txt") -> SyntaxType.PLAIN_TEXT
             fileName.isBlank() || !fileName.contains('.') -> SyntaxType.KOTLIN
             fileName.endsWith(".kt") -> SyntaxType.KOTLIN
             else -> SyntaxType.KOTLIN
@@ -461,14 +467,16 @@ class EditorFragment : Fragment() {
             // New file
             currentFile = FileEntity(
                 id = 0,
-                name = "Untitled",
+                name = defaultUntitledName(pendingNewFileExtension),
                 path = "",
+                fileType = pendingNewFileExtension,
                 lastModified = System.currentTimeMillis(),
                 isReadOnly = false
             )
             binding.editorView.setText("")
-            currentFileExtension = ""
+            currentFileExtension = pendingNewFileExtension
             updateToolbarTitle()
+            scheduleHighlighting()
             return
         }
         
@@ -495,8 +503,7 @@ class EditorFragment : Fragment() {
                     when (which) {
                         DialogInterface.BUTTON_POSITIVE -> saveFile()
                         DialogInterface.BUTTON_NEGATIVE -> {
-                            // Don't save
-                            clearEditor()
+                            showFileTypeChooser { clearEditor(it) }
                         }
                         DialogInterface.BUTTON_NEUTRAL -> {
                             // Cancel
@@ -505,23 +512,38 @@ class EditorFragment : Fragment() {
                 }
             })
         } else {
-            clearEditor()
+            showFileTypeChooser { clearEditor(it) }
         }
     }
 
-    private fun clearEditor() {
+    private fun clearEditor(extension: String = pendingNewFileExtension) {
+        pendingNewFileExtension = extension
         binding.editorView.setText("")
         currentFile = FileEntity(
             id = 0,
-            name = "Untitled",
+            name = defaultUntitledName(extension),
             path = "",
+            fileType = extension,
             lastModified = System.currentTimeMillis(),
             isReadOnly = false
         )
         currentFileId = -1
+        currentFileExtension = extension
         isDirty = false
         updateToolbarTitle()
+        scheduleHighlighting()
     }
+
+    private fun showFileTypeChooser(onSelected: (String) -> Unit) {
+        val labels = arrayOf("Markdown file (.md)", "Kotlin file (.kt)", "Plain text file (.txt)")
+        val extensions = arrayOf("md", "kt", "txt")
+        AlertDialog.Builder(requireContext())
+            .setTitle("What file are you creating?")
+            .setItems(labels) { _, which -> onSelected(extensions[which]) }
+            .show()
+    }
+
+    private fun defaultUntitledName(extension: String): String = "Untitled.${extension.ifBlank { "kt" }}"
 
     private fun showUnsavedChangesDialog(listener: DialogInterface.OnClickListener) {
         AlertDialog.Builder(requireContext())
@@ -581,7 +603,7 @@ class EditorFragment : Fragment() {
         val content = binding.editorView.text.toString()
         
         val input = EditText(requireContext())
-        input.setText(currentFile?.name ?: "Untitled")
+        input.setText(currentFile?.name ?: defaultUntitledName(currentFileExtension))
         
         AlertDialog.Builder(requireContext())
             .setTitle("Save As")
@@ -590,16 +612,24 @@ class EditorFragment : Fragment() {
             .setPositiveButton("Save") { dialog, _ ->
                 var fileName = input.text.toString()
                 if (fileName.isNotEmpty()) {
-                    // If no extension, append .txt
+                    // If no extension, keep the selected file type.
                     if (!fileName.contains(".")) {
-                        fileName += ".txt"
+                        fileName += ".${currentFileExtension.ifBlank { "kt" }}"
                     }
 
                     viewModel.createNewFile(fileName, content) { fileId ->
                         activity?.runOnUiThread {
                             currentFileId = fileId
+                            currentFileExtension = fileName.substringAfterLast('.', "").lowercase(Locale.getDefault())
                             isDirty = false
                             updateToolbarTitle()
+                            viewModel.loadFile(fileId) { f, _ ->
+                                activity?.runOnUiThread {
+                                    currentFile = f
+                                    updateToolbarTitle()
+                                    scheduleHighlighting()
+                                }
+                            }
                             FileHelper.clearCrashRecovery(requireContext())
                             Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
                         }
@@ -927,6 +957,7 @@ class EditorFragment : Fragment() {
 
     private enum class SyntaxType {
         KOTLIN,
-        MARKDOWN
+        MARKDOWN,
+        PLAIN_TEXT
     }
 }

@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:fontFamily="@font/silkscreen"
-        android:text="STARTING SOMETHING NEW TODAY, LEO?"
+        android:text="STARTING SOMETHING NEW TODAY,\nLEO?"
         android:textColor="@color/text_off_white"
         android:textSize="14sp" />
 
@@ -36,7 +36,7 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/cardNewFile"
             android:layout_width="0dp"
-            android:layout_height="180dp"
+            android:layout_height="162dp"
             android:layout_marginEnd="12dp"
             android:layout_weight="1"
             app:cardBackgroundColor="@color/editor_white"
@@ -56,13 +56,13 @@
                     android:gravity="center"
                     android:text="NEW\nFILE"
                     android:textColor="@color/button_save_black"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <ImageView
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="10dp"
                     android:src="@drawable/ic_baseline_insert_drive_file_24"
                     app:tint="@color/button_save_black" />
 
@@ -73,7 +73,7 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/cardNewProject"
             android:layout_width="0dp"
-            android:layout_height="180dp"
+            android:layout_height="162dp"
             android:layout_marginStart="12dp"
             android:layout_weight="1"
             app:cardBackgroundColor="@android:color/transparent"
@@ -99,13 +99,13 @@
                         android:gravity="center"
                         android:text="NEW\nPROJECT"
                         android:textColor="@color/text_off_white"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="10dp"
                         android:src="@drawable/ic_baseline_folder_24"
                         app:tint="@color/text_off_white" />
 
@@ -133,5 +133,18 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/tvNoRecentFiles"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:letterSpacing="0.08"
+        android:text="No recent files"
+        android:textColor="@color/line_number_gray"
+        android:textSize="12sp"
+        android:visibility="gone" />
 
 </LinearLayout>

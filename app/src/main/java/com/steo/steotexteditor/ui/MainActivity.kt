@@ -49,13 +49,11 @@ class MainActivity : AppCompatActivity() {
                     true
                 } else {
                     // not in editor - navigate normally
-                    navController.navigate(item.itemId)
-                    true
+                    navigateToTab(navController, item.itemId)
                 }
             } else {
                 // default navigation for other items
-                navController.navigate(item.itemId)
-                true
+                navigateToTab(navController, item.itemId)
             }
         }
 
@@ -84,5 +82,18 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("steo_prefs", Context.MODE_PRIVATE)
         val coderName = prefs.getString("coder_name", "LEON")
         findViewById<TextView>(R.id.tvProfileName)?.text = coderName?.uppercase()
+    }
+
+    private fun navigateToTab(navController: androidx.navigation.NavController, destinationId: Int): Boolean {
+        return try {
+            if (navController.currentDestination?.id != destinationId) {
+                navController.navigate(destinationId)
+            }
+            true
+        } catch (_: IllegalArgumentException) {
+            false
+        } catch (_: IllegalStateException) {
+            false
+        }
     }
 }
