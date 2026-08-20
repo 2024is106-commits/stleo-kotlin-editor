@@ -2,12 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_save"
-        android:icon="@drawable/ic_baseline_save_24"
-        app:iconTint="#DCDCF0"
-        android:title="Save"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/action_save_as"
         android:icon="@drawable/ic_baseline_save_24"
         app:iconTint="#DCDCF0"

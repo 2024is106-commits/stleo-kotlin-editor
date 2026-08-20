@@ -5,23 +5,49 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@color/deep_space_black">
-
-    <ImageView
-        android:id="@+id/navHeaderLogo"
-        android:layout_width="120dp"
-        android:layout_height="32dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="20dp"
-        android:contentDescription="STEOCODE"
-        android:src="@drawable/ic_logo" />
+    android:background="@drawable/starfield_background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingBottom="8dp">
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/silkscreen"
+            android:letterSpacing="0.08"
+            android:text="EXPLORER"
+            android:textColor="@color/text_off_white"
+            android:textSize="16sp" />
+
+        <ImageButton
+            android:id="@+id/btnCloseDrawer"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Close explorer"
+            android:src="@drawable/ic_menu_close_clear_cancel"
+            app:tint="@color/text_off_white" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvSidebarSlot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:fontFamily="monospace"
+        android:text="{{ SIDEBAR_FILES_SLOT }}"
+        android:textColor="@color/text_off_white"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnNewFile"
@@ -54,7 +80,7 @@
         android:id="@+id/tvEmptyRecent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No recent files yet"
+        android:text="No files to show yet"
         android:textColor="@color/text_off_white"
         android:visibility="gone"
         android:paddingTop="8dp"

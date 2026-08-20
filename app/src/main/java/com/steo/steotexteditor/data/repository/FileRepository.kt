@@ -38,7 +38,7 @@ class FileRepository(private val context: Context) {
 
     /**
      * Saves file content and creates a new version.
-     * v1 stores the full text. Every subsequent version stores a diff patch.
+     * v1 stores the immutable base text. Every subsequent version stores a diff patch.
      */
     suspend fun saveFileWithVersion(
         fileEntity: FileEntity,
@@ -50,19 +50,16 @@ class FileRepository(private val context: Context) {
             lastModified = System.currentTimeMillis()
         ))
 
-        // Write content to disk
-        FileHelper.writeFile(fileEntity.path, content)
-
         val versionCount = versionDao.getVersionCount(fileId)
 
         if (versionCount == 0) {
-            // First save — store full content as patch (null = base)
+            // First save establishes the immutable base layer.
             versionDao.insertVersion(
                 VersionEntity(
                     fileId = fileId,
                     versionNumber = 1,
                     label = label,
-                    patchText = null  // base version, read from disk
+                    patchText = content
                 )
             )
         } else {
@@ -89,6 +86,9 @@ class FileRepository(private val context: Context) {
             )
         }
 
+        // Write content to disk after calculating the version record so the base layer is never read from mutable disk state.
+        FileHelper.writeFile(fileEntity.path, content)
+
         return fileId
     }
 
@@ -106,10 +106,11 @@ class FileRepository(private val context: Context) {
         val versions = versionDao.getVersionsForFile(fileId)
         if (versions.isEmpty()) return null
 
-        val file = fileDao.getFileById(fileId) ?: return null
+        val baseVersion = versions.firstOrNull { it.versionNumber == 1 } ?: return null
+        val file = fileDao.getFileById(fileId)
 
-        // v1 is always the raw file on disk
-        var currentContent = FileHelper.readFile(file.path) ?: return null
+        // New records keep the immutable base in patchText. The disk fallback preserves older records.
+        var currentContent = baseVersion.patchText ?: file?.let { FileHelper.readFile(it.path) } ?: return null
 
         for (version in versions) {
             if (version.versionNumber == 1) continue

@@ -3,23 +3,53 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#05050A"
-    android:padding="12dp">
+    android:background="@drawable/starfield_background"
+    android:paddingStart="16dp"
+    android:paddingTop="14dp"
+    android:paddingEnd="16dp">
 
-    <TextView
-        android:id="@+id/tvVersionsTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Versions"
-        android:textSize="20sp"
-        android:textColor="#E8E8F0"
-        android:paddingBottom="8dp"
-        android:fontFamily="sans-serif-medium" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="14dp">
+
+        <TextView
+            android:id="@+id/tvVersionsTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/silkscreen"
+            android:letterSpacing="0.08"
+            android:text="VERSION HISTORY"
+            android:textColor="#E8E8F0"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tvRevisionCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_baseline_history_24"
+            android:drawablePadding="6dp"
+            android:fontFamily="@font/silkscreen"
+            android:text="0 REVISIONS"
+            android:textColor="#9A9A9F"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#707070" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvVersions"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="16dp"
+        android:paddingBottom="32dp"
         android:overScrollMode="ifContentScrolls" />
 
 </LinearLayout>

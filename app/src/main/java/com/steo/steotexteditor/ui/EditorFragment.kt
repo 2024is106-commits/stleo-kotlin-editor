@@ -17,6 +17,7 @@ import android.text.style.TypefaceSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
@@ -30,7 +31,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.steo.steotexteditor.R
 import com.steo.steotexteditor.data.db.FileEntity
-import com.steo.steotexteditor.data.db.VersionEntity
 import com.steo.steotexteditor.databinding.FragmentEditorBinding
 import com.steo.steotexteditor.util.FileHelper
 import com.steo.steotexteditor.util.UndoRedoManager
@@ -43,12 +43,10 @@ import androidx.core.view.GravityCompat
 import com.google.android.material.navigation.NavigationView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.widget.Button
 import android.widget.TextView
 import com.steo.steotexteditor.ui.RecentFilesAdapter
 import java.util.Locale
 
-import android.view.MenuItem
 import io.noties.markwon.Markwon
 
 class EditorFragment : Fragment() {
@@ -162,6 +160,7 @@ class EditorFragment : Fragment() {
         val rv = header.findViewById<RecyclerView>(R.id.rvRecentFiles) ?: return
         val btnNewFile = header.findViewById<Button>(R.id.btnNewFile) ?: return
         val btnOpenFile = header.findViewById<Button>(R.id.btnOpenFile) ?: return
+        val btnCloseDrawer = header.findViewById<ImageButton>(R.id.btnCloseDrawer)
         val tvEmpty = header.findViewById<TextView>(R.id.tvEmptyRecent) ?: return
 
         val adapter = RecentFilesAdapter(emptyList()) { file ->
@@ -202,6 +201,10 @@ class EditorFragment : Fragment() {
 
         btnOpenFile.setOnClickListener {
             openFile()
+            drawerLayout.closeDrawer(GravityCompat.START)
+        }
+
+        btnCloseDrawer?.setOnClickListener {
             drawerLayout.closeDrawer(GravityCompat.START)
         }
     }
@@ -269,60 +272,6 @@ class EditorFragment : Fragment() {
         binding.btnSave.setOnClickListener {
             saveFile()
         }
-        
-        binding.btnSaveVersion.setOnClickListener {
-            // Prompt for optional label and create a version
-            val input = EditText(requireContext())
-            input.hint = "Optional label"
-            AlertDialog.Builder(requireContext())
-                .setTitle("Save Version")
-                .setView(input)
-                .setPositiveButton("Save") { _, _ ->
-                    val label = input.text.toString().takeIf { it.isNotBlank() }
-                    val file = currentFile ?: return@setPositiveButton
-                    val content = binding.editorView.text.toString()
-
-                                    // Check for changes compared to latest saved version
-                                    viewLifecycleOwner.lifecycleScope.launch {
-                                        var isSame = false
-                                        if (file.id != 0L) {
-                                            val versions = viewModel.getVersionsForFile(file.id)
-                                            val latest = versions.maxOfOrNull { it.versionNumber } ?: 0
-                                            if (latest > 0) {
-                                                val prev = viewModel.reconstructVersion(file.id, latest)
-                                                if (prev != null && prev == content) {
-                                                    isSame = true
-                                                }
-                                            }
-                        }
-
-                                        if (isSame) {
-                                            activity?.runOnUiThread {
-                                                Toast.makeText(requireContext(), "No changes to save", Toast.LENGTH_SHORT).show()
-                                            }
-                                            return@launch
-                                        }
-
-                                        viewModel.createVersion(file, content, label) { fileId ->
-                                            activity?.runOnUiThread {
-                                                // Update currentFile/currentFileId when repository assigned an id (new file case)
-                                                if (currentFile?.id == 0L && fileId > 0) {
-                                                    currentFile = currentFile?.copy(id = fileId)
-                                                    currentFileId = fileId
-                                                    viewModel.setCurrentFile(currentFile)
-                                                } else {
-                                                    // existing file - ensure id is synced
-                                                    currentFileId = fileId
-                                                }
-
-                                                Toast.makeText(requireContext(), "Version saved", Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
-                                    }
-                                }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
 
         binding.btnOverflow.setOnClickListener {
             val popup = androidx.appcompat.widget.PopupMenu(requireContext(), binding.btnOverflow)
@@ -336,7 +285,6 @@ class EditorFragment : Fragment() {
 
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.action_save -> { saveFile(); true }
                     R.id.action_save_as -> { saveAsFile(); true }
                     R.id.action_versions -> {
                         showVersions(); true

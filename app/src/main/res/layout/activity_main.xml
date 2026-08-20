@@ -4,7 +4,7 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/action_bar_dark">
+    android:background="@drawable/starfield_background">
 
     <!-- Main UI Container -->
     <LinearLayout
@@ -18,9 +18,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="60dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:background="@color/action_bar_dark">
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="@drawable/starfield_background">
+
+            <ImageButton
+                android:id="@+id/btnTopDrawer"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Explorer"
+                android:src="@drawable/ic_baseline_menu_24"
+                app:tint="@color/text_off_white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:layout_width="120dp"
@@ -30,6 +42,7 @@
                 android:layout_marginTop="14dp"
                 android:layout_marginBottom="14dp"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -62,6 +75,19 @@
                     android:textColor="@color/text_off_white"
                     android:textSize="14sp"
                     android:fontFamily="@font/silkscreen" />
+
+                <FrameLayout
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/profile_circle_background">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_baseline_account_circle_24" />
+                </FrameLayout>
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -74,14 +100,15 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             app:defaultNavHost="true"
-            app:navGraph="@navigation/nav_graph" />
+            app:navGraph="@navigation/nav_graph"
+            android:background="@drawable/starfield_background" />
 
         <!-- Zone 5: Bottom Navigation Bar -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#0A0A0A"
+            android:background="#000000"
             app:menu="@menu/bottom_nav_menu"
             app:itemIconTint="@color/bottom_nav_colors"
             app:itemTextColor="@color/bottom_nav_colors"
@@ -96,7 +123,7 @@
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/deep_space_black"
+        android:background="@drawable/starfield_background"
         app:headerLayout="@layout/nav_drawer_header"
         app:itemIconTint="@color/icon_tint_soft_white"
         app:itemTextColor="@color/text_off_white" />

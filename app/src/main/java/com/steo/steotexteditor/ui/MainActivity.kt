@@ -3,12 +3,15 @@ package com.steo.steotexteditor.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -27,6 +30,11 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNav.setupWithNavController(navController)
+
+        val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
+        findViewById<ImageButton>(R.id.btnTopDrawer)?.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
 
         updateUserInfo()
         setupObservers()

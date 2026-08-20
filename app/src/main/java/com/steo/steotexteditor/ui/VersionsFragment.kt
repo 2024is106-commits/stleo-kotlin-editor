@@ -33,7 +33,8 @@ class VersionsFragment : Fragment() {
         fileId = arguments?.getLong("file_id") ?: -1
 
         adapter = VersionAdapter(emptyList(), onClick = { version ->
-            // Confirm restore
+            showDiff(version)
+        }, onLongClick = { version ->
             AlertDialog.Builder(requireContext())
                 .setTitle("Restore Version")
                 .setMessage("Restore version ${version.versionNumber}?")
@@ -50,10 +51,6 @@ class VersionsFragment : Fragment() {
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
-        }, onLongClick = { version ->
-            // Show diff bottom sheet
-            val sheet = DiffBottomSheet.newInstance(fileId, version.versionNumber)
-            sheet.show(childFragmentManager, "diff")
         })
 
         binding.rvVersions.layoutManager = LinearLayoutManager(requireContext())
@@ -68,8 +65,14 @@ class VersionsFragment : Fragment() {
             val versions = viewModel.getVersionsForFile(fileId)
             activity?.runOnUiThread {
                 adapter.submitList(versions)
+                binding.tvRevisionCount.text = "${versions.size} ${if (versions.size == 1) "REVISION" else "REVISIONS"}"
             }
         }
+    }
+
+    private fun showDiff(version: VersionEntity) {
+        val sheet = DiffBottomSheet.newInstance(fileId, version.versionNumber)
+        sheet.show(childFragmentManager, "diff")
     }
 
     override fun onDestroyView() {

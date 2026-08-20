@@ -61,17 +61,6 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    /**
-     * Create a named snapshot (version) for an existing file.
-     */
-    fun createVersion(file: FileEntity, content: String, label: String?, onComplete: (Long) -> Unit) {
-        viewModelScope.launch {
-            val l = label ?: "Snapshot"
-            val fileId = fileRepository.saveFileWithVersion(file, content, l)
-            onComplete(fileId)
-        }
-    }
-
     suspend fun getDiffBetweenVersions(fileId: Long, fromVersion: Int, toVersion: Int): List<String> {
         return fileRepository.getDiffBetweenVersions(fileId, fromVersion, toVersion)
     }
@@ -94,7 +83,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
     
     fun saveFile(file: FileEntity, content: String, onSaved: (Long) -> Unit) {
         viewModelScope.launch {
-            val fileId = fileRepository.saveFileWithVersion(file, content, "Manual save")
+            val fileId = fileRepository.saveFileWithVersion(file, content, "Save")
             onSaved(fileId)
         }
     }
