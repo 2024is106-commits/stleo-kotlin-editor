@@ -50,7 +50,13 @@ class FileRepository(private val context: Context) {
             savedFile.id
         }
 
-        val versionNumber = (versionDao.getLatestVersion(fileId)?.versionNumber ?: 0) + 1
+        val latestVersion = versionDao.getLatestVersion(fileId)
+        if (latestVersion?.patchText == content) {
+            FileHelper.writeFile(fileEntity.path, content)
+            return fileId
+        }
+
+        val versionNumber = (latestVersion?.versionNumber ?: 0) + 1
         versionDao.insertVersion(
             VersionEntity(
                 fileId = fileId,
