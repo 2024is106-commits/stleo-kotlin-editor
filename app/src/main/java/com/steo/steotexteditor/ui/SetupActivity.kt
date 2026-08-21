@@ -35,4 +35,5 @@ class SetupActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("steo_prefs", Context.MODE_PRIVATE)
         prefs.edit().putString("coder_name", name).apply()
     }
+
 }

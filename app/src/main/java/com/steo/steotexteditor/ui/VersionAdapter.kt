@@ -60,7 +60,7 @@ class VersionAdapter(
             tvBadge.text = "V${version.versionNumber}"
             tvLatest.isVisible = isLatest
             latestAccent.isVisible = isLatest
-            tvLabel.text = "Saved snapshot v${version.versionNumber}"
+            tvLabel.text = "Version ${version.versionNumber}"
             tvTimestamp.text = SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.getDefault()).format(Date(version.createdAt))
             btnDiff.text = "PREVIEW"
 

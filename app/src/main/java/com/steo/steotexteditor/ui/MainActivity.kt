@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
             text = "Your coder-name:"
             setTextColor(android.graphics.Color.BLACK)
             typeface = ResourcesCompat.getFont(this@MainActivity, R.font.silkscreen)
-            textSize = 16f
+            textSize = 14f
         }
 
         val row = LinearLayout(this).apply {

@@ -446,7 +446,7 @@ class EditorFragment : Fragment() {
 
             if (span.monospace) {
                 editable.setSpan(
-                    TypefaceSpan("monospace"),
+                    TypefaceSpan("Consolas"),
                     span.start,
                     span.end,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -585,11 +585,11 @@ class EditorFragment : Fragment() {
         val title = android.widget.TextView(requireContext()).apply {
             text = "What file are you creating?"
             setTextColor(Color.BLACK)
-            textSize = 20f
+            textSize = 14f
             typeface = try {
-                ResourcesCompat.getFont(requireContext(), R.font.silkscreen) ?: Typeface.DEFAULT_BOLD
+                ResourcesCompat.getFont(requireContext(), R.font.silkscreen) ?: Typeface.DEFAULT
             } catch (_: Exception) {
-                Typeface.DEFAULT_BOLD
+                Typeface.DEFAULT
             }
             setPadding(48, 36, 48, 12)
         }
@@ -601,6 +601,14 @@ class EditorFragment : Fragment() {
     }
 
     private fun defaultUntitledName(extension: String): String = "Untitled.${extension.ifBlank { "txt" }}"
+
+    private fun loadSilkscreen(): Typeface {
+        return try {
+            ResourcesCompat.getFont(requireContext(), R.font.silkscreen) ?: Typeface.DEFAULT
+        } catch (_: Exception) {
+            Typeface.DEFAULT
+        }
+    }
 
     private fun showUnsavedChangesDialog(listener: DialogInterface.OnClickListener) {
         AlertDialog.Builder(requireContext())
@@ -661,6 +669,7 @@ class EditorFragment : Fragment() {
         
         val input = EditText(requireContext())
         input.setText(currentFile?.name ?: defaultUntitledName(currentFileExtension))
+        input.typeface = loadSilkscreen()
         
         AlertDialog.Builder(requireContext())
             .setTitle("Save As")
@@ -718,6 +727,7 @@ class EditorFragment : Fragment() {
         if (currentFile == null || currentFile?.id == 0L) {
             val input = EditText(requireContext())
             input.setText(currentFile?.name ?: "untitled.md")
+            input.typeface = loadSilkscreen()
             AlertDialog.Builder(requireContext())
                 .setTitle("Save file before running")
                 .setMessage("Enter filename (will be saved as Markdown .md):")

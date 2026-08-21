@@ -5,7 +5,7 @@ import androidx.room.*
 @Dao
 interface VersionDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertVersion(version: VersionEntity): Long
 
     @Query("SELECT * FROM versions WHERE fileId = :fileId ORDER BY versionNumber ASC")

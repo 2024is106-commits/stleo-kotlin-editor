@@ -56,7 +56,7 @@ class DiffBottomSheet : BottomSheetDialogFragment() {
             val diffLines = vm.getDiffBetweenVersions(fileId, from, to)
             val diffText = if (diffLines.isEmpty()) "No diff available" else diffLines.joinToString("\n")
             activity?.runOnUiThread {
-                tv.typeface = android.graphics.Typeface.create("monospace", android.graphics.Typeface.NORMAL)
+                tv.typeface = android.graphics.Typeface.create("Consolas", android.graphics.Typeface.NORMAL)
                 tv.text = diffText
             }
         }

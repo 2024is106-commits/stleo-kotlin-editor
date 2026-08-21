@@ -8,19 +8,17 @@ class MarkdownSyntaxHighlighter {
     fun buildSpans(text: String): List<SyntaxHighlightSpan> {
         val spans = mutableListOf<SyntaxHighlightSpan>()
 
-        addStyledColorSpans(
+        addColorSpans(
             destination = spans,
             regex = HEADERS_REGEX,
             text = text,
-            color = COLOR_HEADER,
-            style = Typeface.BOLD
+            color = COLOR_HEADER
         )
-        addStyledColorSpans(
+        addColorSpans(
             destination = spans,
             regex = BOLD_REGEX,
             text = text,
-            color = COLOR_BOLD,
-            style = Typeface.BOLD
+            color = COLOR_BOLD
         )
         addStyledColorSpans(
             destination = spans,

@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.graphics.Typeface
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatEditText
 
@@ -18,6 +19,7 @@ class CodeEditorView @JvmOverloads constructor(
         color = Color.parseColor("#5A5A7A")
         textSize = 35f
         textAlign = Paint.Align.RIGHT
+        typeface = Typeface.create("Consolas", Typeface.NORMAL)
     }
 
     private val rect = Rect()

@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#E8E8F0"
-            android:fontFamily="monospace"
+            android:fontFamily="Consolas"
             android:textSize="12sp" />
 
     </ScrollView>

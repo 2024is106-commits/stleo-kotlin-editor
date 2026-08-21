@@ -77,7 +77,7 @@ class LogsFragment : Fragment() {
             setTextColor(ContextCompat.getColor(requireContext(), R.color.text_off_white))
             typeface = loadSilkscreen()
             textSize = 14f
-            letterSpacing = 0.06f
+            letterSpacing = 0.057f
             setPadding(0, 0, 0, 16)
         })
     }
@@ -86,18 +86,18 @@ class LogsFragment : Fragment() {
         return TextView(requireContext()).apply {
             text = message
             setTextColor(ContextCompat.getColor(requireContext(), R.color.line_number_gray))
-            typeface = Typeface.MONOSPACE
+            typeface = loadSilkscreen()
             gravity = android.view.Gravity.CENTER
             textSize = 12f
-            letterSpacing = 0.08f
+            letterSpacing = 0.076f
         }
     }
 
     private fun loadSilkscreen(): Typeface {
         return try {
-            androidx.core.content.res.ResourcesCompat.getFont(requireContext(), R.font.silkscreen) ?: Typeface.DEFAULT_BOLD
+            androidx.core.content.res.ResourcesCompat.getFont(requireContext(), R.font.silkscreen) ?: Typeface.DEFAULT
         } catch (_: Exception) {
-            Typeface.DEFAULT_BOLD
+            Typeface.DEFAULT
         }
     }
 

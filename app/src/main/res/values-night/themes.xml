@@ -7,6 +7,8 @@
         <item name="android:textColor">@color/text_off_white</item>
         <item name="android:textColorPrimary">@color/text_off_white</item>
         <item name="android:textColorSecondary">@color/icon_tint_soft_white</item>
+        <item name="android:fontFamily">@font/silkscreen</item>
+        <item name="fontFamily">@font/silkscreen</item>
         <item name="android:statusBarColor">@color/deep_space_black</item>
         <item name="android:navigationBarColor">@color/deep_space_black</item>
         <item name="toolbarStyle">@style/Widget.Steotexteditor.Toolbar</item>
@@ -40,9 +42,19 @@
     </style>
 
     <style name="TextAppearance.Steotexteditor.ToolbarTitle" parent="TextAppearance.Material3.TitleLarge">
-        <item name="android:fontFamily">monospace</item>
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:textColor">@color/text_off_white</item>
         <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="TextAppearance.Steotexteditor.NavLabel" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Steotexteditor.Placeholder" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="fontFamily">sans-serif</item>
     </style>
 
     <style name="DarkPopupMenu" parent="Widget.AppCompat.PopupMenu">

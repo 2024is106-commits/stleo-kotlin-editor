@@ -96,7 +96,7 @@ class VersionsFragment : Fragment() {
                 val preview = TextView(requireContext()).apply {
                     text = content.ifBlank { "EMPTY VERSION" }
                     setTextColor(android.graphics.Color.parseColor("#E8E8F0"))
-                    typeface = android.graphics.Typeface.MONOSPACE
+                    typeface = android.graphics.Typeface.create("Consolas", android.graphics.Typeface.NORMAL)
                     setPadding(32, 24, 32, 24)
                 }
                 val scroll = ScrollView(requireContext()).apply {

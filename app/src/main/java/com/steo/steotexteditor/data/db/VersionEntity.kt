@@ -20,6 +20,6 @@ data class VersionEntity(
     val fileId: Long,
     val versionNumber: Int,
     val label: String,
-    val patchText: String?,   // v1 stores base content; later versions store unified diffs
+    val patchText: String?,   // Immutable full-file snapshot for this save.
     val createdAt: Long = System.currentTimeMillis()
 )

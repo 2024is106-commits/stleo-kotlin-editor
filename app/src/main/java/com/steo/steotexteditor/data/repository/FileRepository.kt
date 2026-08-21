@@ -1,8 +1,5 @@
 package com.steo.steotexteditor.data.repository
 
-import com.github.difflib.DiffUtils
-import com.github.difflib.patch.Patch
-import com.github.difflib.UnifiedDiffUtils
 import com.steo.steotexteditor.data.db.AppDatabase
 import com.steo.steotexteditor.data.db.FileEntity
 import com.steo.steotexteditor.data.db.VersionEntity
@@ -37,56 +34,33 @@ class FileRepository(private val context: Context) {
     // ── Save & version creation ───────────────────────────────────
 
     /**
-     * Saves file content and creates a new version.
-     * v1 stores the immutable base text. Every subsequent version stores a diff patch.
+     * Saves file content and appends a new immutable version snapshot.
      */
     suspend fun saveFileWithVersion(
         fileEntity: FileEntity,
         content: String,
         label: String
     ): Long {
-        // Upsert the file record
-        val fileId = fileDao.insertFile(fileEntity.copy(
-            lastModified = System.currentTimeMillis()
-        ))
-
-        val versionCount = versionDao.getVersionCount(fileId)
-
-        if (versionCount == 0) {
-            // First save establishes the immutable base layer.
-            versionDao.insertVersion(
-                VersionEntity(
-                    fileId = fileId,
-                    versionNumber = 1,
-                    label = label,
-                    patchText = content
-                )
-            )
+        val savedAt = System.currentTimeMillis()
+        val savedFile = fileEntity.copy(lastModified = savedAt)
+        val fileId = if (savedFile.id == 0L) {
+            fileDao.insertFile(savedFile)
         } else {
-            // Subsequent saves — compute delta from previous version
-            val previousContent = reconstructVersion(fileId, versionCount)
-                ?: return fileId
-
-            val previousLines = previousContent.lines()
-            val currentLines = content.lines()
-
-            val patch = DiffUtils.diff(previousLines, currentLines)
-            val unifiedDiff = UnifiedDiffUtils.generateUnifiedDiff(
-                "previous", "current", previousLines, patch, 3
-            )
-            val patchText = unifiedDiff.joinToString("\n")
-
-            versionDao.insertVersion(
-                VersionEntity(
-                    fileId = fileId,
-                    versionNumber = versionCount + 1,
-                    label = label,
-                    patchText = patchText
-                )
-            )
+            fileDao.updateFile(savedFile)
+            savedFile.id
         }
 
-        // Write content to disk after calculating the version record so the base layer is never read from mutable disk state.
+        val versionNumber = (versionDao.getLatestVersion(fileId)?.versionNumber ?: 0) + 1
+        versionDao.insertVersion(
+            VersionEntity(
+                fileId = fileId,
+                versionNumber = versionNumber,
+                label = label,
+                patchText = content,
+                createdAt = savedAt
+            )
+        )
+
         FileHelper.writeFile(fileEntity.path, content)
 
         return fileId
@@ -99,32 +73,12 @@ class FileRepository(private val context: Context) {
     }
 
     /**
-     * Reconstructs file content at a given version number
-     * by applying patches from v1 up to the target version.
+     * Returns the immutable file content saved for a version.
      */
     suspend fun reconstructVersion(fileId: Long, targetVersionNumber: Int): String? {
-        val versions = versionDao.getVersionsForFile(fileId)
-        if (versions.isEmpty()) return null
-
-        val baseVersion = versions.firstOrNull { it.versionNumber == 1 } ?: return null
-        val file = fileDao.getFileById(fileId)
-
-        // New records keep the immutable base in patchText. The disk fallback preserves older records.
-        var currentContent = baseVersion.patchText ?: file?.let { FileHelper.readFile(it.path) } ?: return null
-
-        for (version in versions) {
-            if (version.versionNumber == 1) continue
-            if (version.versionNumber > targetVersionNumber) break
-
-            val patchText = version.patchText ?: continue
-            val patchLines = patchText.lines()
-            val originalLines = currentContent.lines()
-
-            val patch: Patch<String> = UnifiedDiffUtils.parseUnifiedDiff(patchLines)
-            currentContent = DiffUtils.patch(originalLines, patch).joinToString("\n")
-        }
-
-        return currentContent
+        return versionDao.getVersionsForFile(fileId)
+            .firstOrNull { it.versionNumber == targetVersionNumber }
+            ?.patchText
     }
 
     /**
@@ -147,9 +101,30 @@ class FileRepository(private val context: Context) {
         val from = reconstructVersion(fileId, fromVersion) ?: return emptyList()
         val to = reconstructVersion(fileId, toVersion) ?: return emptyList()
 
-        val patch = DiffUtils.diff(from.lines(), to.lines())
-        return UnifiedDiffUtils.generateUnifiedDiff(
-            "v$fromVersion", "v$toVersion", from.lines(), patch, 3
-        )
+        return buildUnifiedDiffLines(fromVersion, toVersion, from.lines(), to.lines())
+    }
+
+    private fun buildUnifiedDiffLines(
+        fromVersion: Int,
+        toVersion: Int,
+        fromLines: List<String>,
+        toLines: List<String>
+    ): List<String> {
+        val rows = mutableListOf("v$fromVersion -> v$toVersion")
+        val max = maxOf(fromLines.size, toLines.size)
+        for (index in 0 until max) {
+            val oldLine = fromLines.getOrNull(index)
+            val newLine = toLines.getOrNull(index)
+            when {
+                oldLine == newLine -> rows.add(" ${index + 1}: ${oldLine.orEmpty()}")
+                oldLine == null -> rows.add("+${index + 1}: ${newLine.orEmpty()}")
+                newLine == null -> rows.add("-${index + 1}: ${oldLine}")
+                else -> {
+                    rows.add("-${index + 1}: ${oldLine}")
+                    rows.add("+${index + 1}: ${newLine}")
+                }
+            }
+        }
+        return rows
     }
 }

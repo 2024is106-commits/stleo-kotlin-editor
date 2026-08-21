@@ -34,8 +34,7 @@
             android:background="@android:color/transparent"
             android:text="main.kt"
             android:textColor="@color/button_save_black"
-            android:textSize="16sp"
-            android:textStyle="bold"
+            android:textSize="14sp"
             android:fontFamily="@font/silkscreen"
             android:singleLine="true"
             android:imeOptions="actionDone"
@@ -148,7 +147,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="#111515"
-            android:fontFamily="monospace"
+            android:fontFamily="Consolas"
             android:gravity="top|start"
             android:inputType="textMultiLine|textNoSuggestions"
             android:paddingTop="16dp"
@@ -174,7 +173,7 @@
                 android:padding="16dp"
                 android:textColor="#E8E8F0"
                 android:textSize="15sp"
-                android:fontFamily="monospace" />
+                android:fontFamily="Consolas" />
 
         </ScrollView>
 

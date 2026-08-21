@@ -103,6 +103,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
     fun saveFile(file: FileEntity, content: String, onSaved: (Long) -> Unit) {
         viewModelScope.launch {
             val fileId = fileRepository.saveFileWithVersion(file, content, "Save")
+            _currentFile.value = fileRepository.getFileById(fileId) ?: file.copy(id = fileId)
             onSaved(fileId)
         }
     }
@@ -122,6 +123,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
             FileHelper.writeFile(path, content)
             // Then save to database with version
             val fileId = fileRepository.saveFileWithVersion(newFile, content, "Initial save")
+            _currentFile.value = fileRepository.getFileById(fileId) ?: newFile.copy(id = fileId)
             onSaved(fileId)
         }
     }
@@ -147,6 +149,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
                     val fileId = fileRepository.saveFileWithVersion(file, content ?: "", "Initial import")
                     file = fileRepository.getFileById(fileId)
                 }
+                _currentFile.value = file
                 onFileOpened(file, content)
             } catch (e: Exception) {
                 onFileOpened(null, null)

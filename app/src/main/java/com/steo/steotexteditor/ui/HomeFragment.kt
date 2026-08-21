@@ -77,11 +77,11 @@ class HomeFragment : Fragment() {
         val title = TextView(requireContext()).apply {
             text = "What file are you creating?"
             setTextColor(Color.BLACK)
-            textSize = 20f
+            textSize = 14f
             typeface = try {
-                ResourcesCompat.getFont(requireContext(), R.font.silkscreen) ?: Typeface.DEFAULT_BOLD
+                ResourcesCompat.getFont(requireContext(), R.font.silkscreen) ?: Typeface.DEFAULT
             } catch (_: Exception) {
-                Typeface.DEFAULT_BOLD
+                Typeface.DEFAULT
             }
             setPadding(48, 36, 48, 12)
         }

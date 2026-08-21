@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/silkscreen"
-            android:letterSpacing="0.1"
+            android:letterSpacing="0.095"
             android:text="STEOCODE"
             android:textColor="@color/text_off_white"
             android:textSize="20sp" />
