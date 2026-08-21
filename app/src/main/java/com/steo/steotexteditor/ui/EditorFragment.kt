@@ -159,7 +159,6 @@ class EditorFragment : Fragment() {
             .setMessage("It looks like the app closed unexpectedly while editing ${draft.fileName}. Would you like to restore or discard your unsaved content?")
             .setPositiveButton("Restore") { _, _ ->
                 restoreDraft(draft)
-                FileHelper.clearCrashRecovery(requireContext())
             }
             .setNegativeButton("Discard") { _, _ ->
                 viewModel.discardRecoveryDraft()
@@ -528,14 +527,18 @@ class EditorFragment : Fragment() {
     private fun canPreviewMarkdown(): Boolean = resolveFileType(currentFile) == "md"
 
     private fun loadFile() {
-        if (currentFileId == -1L) {
-            viewModel.consumeRecoveryDraftIfNeeded()?.let { draft ->
-                showRecoveryDialog(draft) {
+        viewModel.consumeRecoveryDraftIfNeeded()?.let { draft ->
+            showRecoveryDialog(draft) {
+                if (currentFileId == -1L) {
                     showFileTypeChooser { clearEditor(it) }
+                } else {
+                    loadRequestedFile()
                 }
-                return
             }
+            return
+        }
 
+        if (currentFileId == -1L) {
             val activeFile = viewModel.currentFile.value
             if (activeFile != null) {
                 resumeEditorSession(activeFile)
@@ -564,6 +567,10 @@ class EditorFragment : Fragment() {
             return
         }
         
+        loadRequestedFile()
+    }
+
+    private fun loadRequestedFile() {
         val activeFile = viewModel.currentFile.value
         val activeSession = viewModel.sessionState.value
         if (activeFile != null && activeSession?.currentFileId == currentFileId) {
@@ -1100,6 +1107,7 @@ class EditorFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
+        viewModel.persistRecoveryDraftNow()
     }
 
     override fun onDestroyView() {

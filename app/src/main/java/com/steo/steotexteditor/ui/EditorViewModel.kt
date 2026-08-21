@@ -10,6 +10,7 @@ import com.steo.steotexteditor.data.repository.FileRepository
 import com.steo.steotexteditor.util.FileHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.lifecycle.LiveData
@@ -41,6 +42,8 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
     private val _sessionState = MutableLiveData(EditorSessionState())
     val sessionState: LiveData<EditorSessionState> = _sessionState
     private var shouldOfferRecovery = FileHelper.readCrashRecoveryDraft(application) != null
+    private var lastRecoveryDraftSignature: String? = null
+    private var recoverySaveJob: Job? = null
 
     init {
         startAutoSave()
@@ -99,7 +102,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
         val fileName = file?.name ?: _sessionState.value?.currentFileName ?: "Untitled.txt"
         val fileType = file?.fileType?.ifBlank { fileName.substringAfterLast('.', "txt") }
             ?: fileName.substringAfterLast('.', _sessionState.value?.currentFileType ?: "txt")
-        _sessionState.value = EditorSessionState(
+        val nextState = EditorSessionState(
             currentFileName = fileName,
             currentFileType = fileType.lowercase(),
             currentFileContent = content,
@@ -108,7 +111,50 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
             currentFileId = file?.id ?: _sessionState.value?.currentFileId ?: 0L,
             currentFilePath = file?.path ?: _sessionState.value?.currentFilePath.orEmpty()
         )
+        _sessionState.value = nextState
         editorContent.value = content
+        if (hasUnsavedChanges) {
+            queueRecoveryDraftSave(nextState)
+        }
+    }
+
+    private fun queueRecoveryDraftSave(state: EditorSessionState) {
+        val signature = recoverySignature(state)
+        if (signature == lastRecoveryDraftSignature) return
+        lastRecoveryDraftSignature = signature
+        recoverySaveJob?.cancel()
+        recoverySaveJob = viewModelScope.launch(Dispatchers.IO) {
+            FileHelper.saveCrashRecovery(context, state.toRecoveryDraft())
+        }
+    }
+
+    fun persistRecoveryDraftNow() {
+        val state = _sessionState.value ?: return
+        if (!state.hasUnsavedChanges) return
+        val signature = recoverySignature(state)
+        lastRecoveryDraftSignature = signature
+        recoverySaveJob?.cancel()
+        FileHelper.saveCrashRecovery(context, state.toRecoveryDraft())
+    }
+
+    private fun recoverySignature(state: EditorSessionState): String {
+        return listOf(
+            state.currentFileId,
+            state.currentFileName,
+            state.currentFileType,
+            state.currentFilePath,
+            state.currentFileContent
+        ).joinToString(separator = "\u0001")
+    }
+
+    private fun EditorSessionState.toRecoveryDraft(): FileHelper.RecoveryDraft {
+        return FileHelper.RecoveryDraft(
+            content = currentFileContent,
+            fileName = currentFileName,
+            fileType = currentFileType,
+            fileId = currentFileId,
+            path = currentFilePath
+        )
     }
 
     fun updateSessionFile(fileName: String, fileType: String, fileId: Long, path: String) {
@@ -129,6 +175,8 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun discardRecoveryDraft() {
+        lastRecoveryDraftSignature = null
+        recoverySaveJob?.cancel()
         FileHelper.clearCrashRecovery(context)
     }
 
@@ -153,7 +201,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
                 val content = fileRepository.reconstructVersion(fileId, versionNumber).orEmpty()
                 _currentFile.value = file
                 updateEditorSession(file, content, hasUnsavedChanges = false)
-                FileHelper.clearCrashRecovery(context)
+                discardRecoveryDraft()
             }
             onComplete(result)
         }
@@ -185,6 +233,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
             val savedFile = fileRepository.getFileById(fileId) ?: file.copy(id = fileId)
             _currentFile.value = savedFile
             updateEditorSession(savedFile, content, hasUnsavedChanges = false)
+            discardRecoveryDraft()
             onSaved(fileId)
         }
     }
@@ -207,6 +256,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
             val savedFile = fileRepository.getFileById(fileId) ?: newFile.copy(id = fileId)
             _currentFile.value = savedFile
             updateEditorSession(savedFile, content, hasUnsavedChanges = false)
+            discardRecoveryDraft()
             onSaved(fileId)
         }
     }

@@ -55,7 +55,7 @@ object FileHelper {
                 .putString("file_type", draft.fileType)
                 .putLong("file_id", draft.fileId)
                 .putString("path", draft.path)
-                .apply()
+                .commit()
         } catch (e: Exception) {}
     }
 
@@ -93,7 +93,7 @@ object FileHelper {
             context.getSharedPreferences("steo_recovery", Context.MODE_PRIVATE)
                 .edit()
                 .clear()
-                .apply()
+                .commit()
         } catch (e: Exception) {}
     }
 
