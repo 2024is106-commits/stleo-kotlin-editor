@@ -5,6 +5,13 @@ import java.io.File
 import java.io.IOException
 
 object FileHelper {
+    data class RecoveryDraft(
+        val content: String,
+        val fileName: String,
+        val fileType: String,
+        val fileId: Long,
+        val path: String
+    )
 
     fun writeFile(path: String, content: String): Boolean {
         return try {
@@ -39,6 +46,19 @@ object FileHelper {
         } catch (e: Exception) {}
     }
 
+    fun saveCrashRecovery(context: Context, draft: RecoveryDraft) {
+        try {
+            getCrashRecoveryFile(context).writeText(draft.content)
+            context.getSharedPreferences("steo_recovery", Context.MODE_PRIVATE)
+                .edit()
+                .putString("file_name", draft.fileName)
+                .putString("file_type", draft.fileType)
+                .putLong("file_id", draft.fileId)
+                .putString("path", draft.path)
+                .apply()
+        } catch (e: Exception) {}
+    }
+
     fun readCrashRecovery(context: Context): String? {
         val file = getCrashRecoveryFile(context)
         return if (file.exists()) {
@@ -50,9 +70,30 @@ object FileHelper {
         } else null
     }
 
+    fun readCrashRecoveryDraft(context: Context): RecoveryDraft? {
+        val content = readCrashRecovery(context) ?: return null
+        val prefs = context.getSharedPreferences("steo_recovery", Context.MODE_PRIVATE)
+        val fileName = prefs.getString("file_name", null)
+        val path = prefs.getString("path", "").orEmpty()
+        val fileType = prefs.getString("file_type", null)
+            ?: fileName?.substringAfterLast('.', "txt")
+            ?: "txt"
+        return RecoveryDraft(
+            content = content,
+            fileName = fileName ?: "Untitled.$fileType",
+            fileType = fileType.lowercase(),
+            fileId = prefs.getLong("file_id", 0L),
+            path = path
+        )
+    }
+
     fun clearCrashRecovery(context: Context) {
         try {
             getCrashRecoveryFile(context).delete()
+            context.getSharedPreferences("steo_recovery", Context.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .apply()
         } catch (e: Exception) {}
     }
 

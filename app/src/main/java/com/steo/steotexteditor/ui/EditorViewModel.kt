@@ -22,12 +22,25 @@ data class ActivityLogEntry(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+data class EditorSessionState(
+    val currentFileName: String = "Untitled.txt",
+    val currentFileType: String = "txt",
+    val currentFileContent: String = "",
+    val isSessionAlive: Boolean = true,
+    val hasUnsavedChanges: Boolean = false,
+    val currentFileId: Long = 0L,
+    val currentFilePath: String = ""
+)
+
 class EditorViewModel(application: Application) : AndroidViewModel(application) {
     
     private val fileRepository = FileRepository(application)
     private val context = application
 
     val editorContent = MutableLiveData<String>()
+    private val _sessionState = MutableLiveData(EditorSessionState())
+    val sessionState: LiveData<EditorSessionState> = _sessionState
+    private var shouldOfferRecovery = FileHelper.readCrashRecoveryDraft(application) != null
 
     init {
         startAutoSave()
@@ -38,9 +51,19 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
             while (true) {
                 delay(10000L)
                 val content = editorContent.value
-                if (content != null) {
+                val state = _sessionState.value
+                if (content != null && state?.hasUnsavedChanges == true) {
                     withContext(Dispatchers.IO) {
-                        FileHelper.saveCrashRecovery(context, content)
+                        FileHelper.saveCrashRecovery(
+                            context,
+                            FileHelper.RecoveryDraft(
+                                content = state.currentFileContent,
+                                fileName = state.currentFileName,
+                                fileType = state.currentFileType,
+                                fileId = state.currentFileId,
+                                path = state.currentFilePath
+                            )
+                        )
                     }
                 }
             }
@@ -58,6 +81,55 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
 
     fun setCurrentFile(file: FileEntity?) {
         _currentFile.value = file
+        file?.let {
+            updateSessionFile(
+                fileName = it.name,
+                fileType = it.fileType.ifBlank { it.name.substringAfterLast('.', "txt") },
+                fileId = it.id,
+                path = it.path
+            )
+        }
+    }
+
+    fun updateEditorSession(
+        file: FileEntity?,
+        content: String,
+        hasUnsavedChanges: Boolean
+    ) {
+        val fileName = file?.name ?: _sessionState.value?.currentFileName ?: "Untitled.txt"
+        val fileType = file?.fileType?.ifBlank { fileName.substringAfterLast('.', "txt") }
+            ?: fileName.substringAfterLast('.', _sessionState.value?.currentFileType ?: "txt")
+        _sessionState.value = EditorSessionState(
+            currentFileName = fileName,
+            currentFileType = fileType.lowercase(),
+            currentFileContent = content,
+            isSessionAlive = true,
+            hasUnsavedChanges = hasUnsavedChanges,
+            currentFileId = file?.id ?: _sessionState.value?.currentFileId ?: 0L,
+            currentFilePath = file?.path ?: _sessionState.value?.currentFilePath.orEmpty()
+        )
+        editorContent.value = content
+    }
+
+    fun updateSessionFile(fileName: String, fileType: String, fileId: Long, path: String) {
+        val current = _sessionState.value ?: EditorSessionState()
+        _sessionState.value = current.copy(
+            currentFileName = fileName,
+            currentFileType = fileType.lowercase(),
+            currentFileId = fileId,
+            currentFilePath = path,
+            isSessionAlive = true
+        )
+    }
+
+    fun consumeRecoveryDraftIfNeeded(): FileHelper.RecoveryDraft? {
+        if (!shouldOfferRecovery) return null
+        shouldOfferRecovery = false
+        return FileHelper.readCrashRecoveryDraft(context)
+    }
+
+    fun discardRecoveryDraft() {
+        FileHelper.clearCrashRecovery(context)
     }
 
     fun recordActivity(file: FileEntity, message: String) {
@@ -103,7 +175,9 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
     fun saveFile(file: FileEntity, content: String, onSaved: (Long) -> Unit) {
         viewModelScope.launch {
             val fileId = fileRepository.saveFileWithVersion(file, content, "Save")
-            _currentFile.value = fileRepository.getFileById(fileId) ?: file.copy(id = fileId)
+            val savedFile = fileRepository.getFileById(fileId) ?: file.copy(id = fileId)
+            _currentFile.value = savedFile
+            updateEditorSession(savedFile, content, hasUnsavedChanges = false)
             onSaved(fileId)
         }
     }
@@ -123,7 +197,9 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
             FileHelper.writeFile(path, content)
             // Then save to database with version
             val fileId = fileRepository.saveFileWithVersion(newFile, content, "Initial save")
-            _currentFile.value = fileRepository.getFileById(fileId) ?: newFile.copy(id = fileId)
+            val savedFile = fileRepository.getFileById(fileId) ?: newFile.copy(id = fileId)
+            _currentFile.value = savedFile
+            updateEditorSession(savedFile, content, hasUnsavedChanges = false)
             onSaved(fileId)
         }
     }
@@ -150,6 +226,7 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
                     file = fileRepository.getFileById(fileId)
                 }
                 _currentFile.value = file
+                updateEditorSession(file, content.orEmpty(), hasUnsavedChanges = false)
                 onFileOpened(file, content)
             } catch (e: Exception) {
                 onFileOpened(null, null)

@@ -94,10 +94,11 @@ class EditorFragment : Fragment() {
                     if (file != null && content != null) {
                         currentFile = file
                         currentFileId = file.id
-                        binding.editorView.setText(content)
-                        currentFileExtension = file.name.substringAfterLast('.', "").lowercase(Locale.getDefault())
+                        currentFileExtension = resolveFileType(file)
+                        setEditorText(content)
                         isDirty = false
                         updateToolbarTitle()
+                        viewModel.updateEditorSession(file, content, hasUnsavedChanges = false)
                         scheduleHighlighting()
                     } else {
                         Toast.makeText(requireContext(), "Failed to open file", Toast.LENGTH_SHORT).show()
@@ -129,29 +130,41 @@ class EditorFragment : Fragment() {
         markwon = Markwon.builder(requireContext()).build()
 
         loadFile()
-        
-        checkCrashRecovery()
     }
 
-    private fun checkCrashRecovery() {
-        val crashRecoveryContent = FileHelper.readCrashRecovery(requireContext())
-        if (!crashRecoveryContent.isNullOrEmpty()) {
-            val fileName = currentFile?.name ?: defaultUntitledName(currentFileExtension.ifBlank { pendingNewFileExtension })
-            AlertDialog.Builder(requireContext())
-                .setTitle("Recover Unsaved Work")
-                .setMessage("It looks like the app closed unexpectedly while editing $fileName. Would you like to restore or discard your unsaved content?")
-                .setPositiveButton("Restore") { _, _ ->
-                    binding.editorView.setText(crashRecoveryContent)
-                    isDirty = true
-                    updateToolbarTitle()
-                    FileHelper.clearCrashRecovery(requireContext())
-                }
-                .setNegativeButton("Discard") { _, _ ->
-                    FileHelper.clearCrashRecovery(requireContext())
-                }
-                .setCancelable(false)
-                .show()
-        }
+    private fun showRecoveryDialog(draft: FileHelper.RecoveryDraft, onDiscard: () -> Unit) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Recover Unsaved Work")
+            .setMessage("It looks like the app closed unexpectedly while editing ${draft.fileName}. Would you like to restore or discard your unsaved content?")
+            .setPositiveButton("Restore") { _, _ ->
+                restoreDraft(draft)
+                FileHelper.clearCrashRecovery(requireContext())
+            }
+            .setNegativeButton("Discard") { _, _ ->
+                viewModel.discardRecoveryDraft()
+                onDiscard()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun restoreDraft(draft: FileHelper.RecoveryDraft) {
+        val restoredFile = FileEntity(
+            id = draft.fileId,
+            name = draft.fileName,
+            path = draft.path,
+            fileType = draft.fileType,
+            lastModified = System.currentTimeMillis(),
+            isReadOnly = false
+        )
+        currentFile = restoredFile
+        currentFileId = restoredFile.id
+        currentFileExtension = restoredFile.fileType
+        setEditorText(draft.content)
+        isDirty = true
+        updateToolbarTitle()
+        scheduleHighlighting()
+        viewModel.updateEditorSession(restoredFile, draft.content, hasUnsavedChanges = true)
     }
 
     private lateinit var drawerLayout: DrawerLayout
@@ -177,9 +190,11 @@ class EditorFragment : Fragment() {
                     if (f != null) {
                         currentFile = f
                         currentFileId = f.id
-                        binding.editorView.setText(content ?: "")
+                        currentFileExtension = resolveFileType(f)
+                        setEditorText(content ?: "")
                         isDirty = false
                         updateToolbarTitle()
+                        viewModel.updateEditorSession(f, content.orEmpty(), hasUnsavedChanges = false)
                         viewModel.setCurrentFile(f)
                         drawerLayout.closeDrawer(GravityCompat.START)
                     }
@@ -280,7 +295,7 @@ class EditorFragment : Fragment() {
 
             // Show preview menu only for markdown files
             val previewItem = popup.menu.findItem(R.id.action_preview)
-            previewItem?.isVisible = currentFileExtension == "md"
+            previewItem?.isVisible = canPreviewMarkdown()
             // tint icon if currently in preview mode
             previewItem?.icon?.setTint(if (isPreviewMode) Color.parseColor("#7B2FBE") else Color.parseColor("#DCDCF0"))
 
@@ -342,11 +357,16 @@ class EditorFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (isProgrammaticTextChange) return
                 if (!isDirty) {
                     isDirty = true
                     updateToolbarTitle()
                 }
-                viewModel.editorContent.value = s?.toString() ?: ""
+                viewModel.updateEditorSession(
+                    file = currentFile,
+                    content = s?.toString() ?: "",
+                    hasUnsavedChanges = true
+                )
                 scheduleHighlighting()
             }
 
@@ -465,8 +485,36 @@ class EditorFragment : Fragment() {
         viewModel.setCurrentFile(currentFile)
     }
 
+    private fun setEditorText(content: String) {
+        isProgrammaticTextChange = true
+        binding.editorView.setText(content)
+        isProgrammaticTextChange = false
+    }
+
+    private fun resolveFileType(file: FileEntity?): String {
+        val stateType = viewModel.sessionState.value?.currentFileType.orEmpty()
+        val fileType = file?.fileType.orEmpty()
+        val fileName = file?.name.orEmpty()
+        return when {
+            fileType.isNotBlank() -> fileType.lowercase(Locale.getDefault())
+            fileName.contains('.') -> fileName.substringAfterLast('.', "txt").lowercase(Locale.getDefault())
+            stateType.isNotBlank() -> stateType.lowercase(Locale.getDefault())
+            currentFileExtension.isNotBlank() -> currentFileExtension.lowercase(Locale.getDefault())
+            else -> "txt"
+        }
+    }
+
+    private fun canPreviewMarkdown(): Boolean = resolveFileType(currentFile) == "md"
+
     private fun loadFile() {
         if (currentFileId == -1L) {
+            viewModel.consumeRecoveryDraftIfNeeded()?.let { draft ->
+                showRecoveryDialog(draft) {
+                    showFileTypeChooser { clearEditor(it) }
+                }
+                return
+            }
+
             val activeFile = viewModel.currentFile.value
             if (activeFile != null) {
                 resumeEditorSession(activeFile)
@@ -487,9 +535,10 @@ class EditorFragment : Fragment() {
                 lastModified = System.currentTimeMillis(),
                 isReadOnly = false
             )
-            binding.editorView.setText("")
+            setEditorText("")
             currentFileExtension = pendingNewFileExtension
             updateToolbarTitle()
+            viewModel.updateEditorSession(currentFile, "", hasUnsavedChanges = false)
             scheduleHighlighting()
             return
         }
@@ -498,10 +547,11 @@ class EditorFragment : Fragment() {
             activity?.runOnUiThread {
                 if (file != null && content != null) {
                     currentFile = file
-                    binding.editorView.setText(content)
+                    setEditorText(content)
                     isDirty = false
-                    currentFileExtension = file.name.substringAfterLast('.', "").lowercase(Locale.getDefault())
+                    currentFileExtension = resolveFileType(file)
                     updateToolbarTitle()
+                    viewModel.updateEditorSession(file, content, hasUnsavedChanges = false)
                 } else {
                     Toast.makeText(requireContext(), "File not found", Toast.LENGTH_SHORT).show()
                     parentFragmentManager.popBackStack()
@@ -533,12 +583,14 @@ class EditorFragment : Fragment() {
     private fun resumeEditorSession(file: FileEntity) {
         currentFile = file
         currentFileId = file.id
-        currentFileExtension = file.name.substringAfterLast('.', file.fileType).lowercase(Locale.getDefault())
+        currentFileExtension = resolveFileType(file)
 
         if (file.id > 0L) {
-            val inMemoryContent = viewModel.editorContent.value
+            val session = viewModel.sessionState.value
+            val inMemoryContent = session?.currentFileContent
             if (inMemoryContent != null) {
-                binding.editorView.setText(inMemoryContent)
+                setEditorText(inMemoryContent)
+                isDirty = session.hasUnsavedChanges
                 updateToolbarTitle()
                 scheduleHighlighting()
                 return
@@ -547,15 +599,19 @@ class EditorFragment : Fragment() {
             viewModel.loadFile(file.id) { loadedFile, content ->
                 activity?.runOnUiThread {
                     currentFile = loadedFile ?: file
-                    binding.editorView.setText(content ?: viewModel.editorContent.value.orEmpty())
+                    currentFileExtension = resolveFileType(currentFile)
+                    val restoredContent = content ?: viewModel.sessionState.value?.currentFileContent.orEmpty()
+                    setEditorText(restoredContent)
                     isDirty = false
                     updateToolbarTitle()
+                    viewModel.updateEditorSession(currentFile, restoredContent, hasUnsavedChanges = false)
                     scheduleHighlighting()
                 }
             }
         } else {
-            binding.editorView.setText(viewModel.editorContent.value.orEmpty())
-            isDirty = false
+            val session = viewModel.sessionState.value
+            setEditorText(session?.currentFileContent.orEmpty())
+            isDirty = session?.hasUnsavedChanges == true
             updateToolbarTitle()
             scheduleHighlighting()
         }
@@ -563,7 +619,7 @@ class EditorFragment : Fragment() {
 
     private fun clearEditor(extension: String = pendingNewFileExtension) {
         pendingNewFileExtension = extension
-        binding.editorView.setText("")
+        setEditorText("")
         currentFile = FileEntity(
             id = 0,
             name = defaultUntitledName(extension),
@@ -576,6 +632,7 @@ class EditorFragment : Fragment() {
         currentFileExtension = extension
         isDirty = false
         updateToolbarTitle()
+        viewModel.updateEditorSession(currentFile, "", hasUnsavedChanges = false)
         scheduleHighlighting()
     }
 
@@ -742,11 +799,13 @@ class EditorFragment : Fragment() {
                                 activity?.runOnUiThread {
                                     if (f != null) {
                                         currentFile = f
-                                        binding.editorView.setText(c ?: "")
+                                        currentFileExtension = resolveFileType(f)
+                                        setEditorText(c ?: "")
                                         isDirty = false
                                         updateToolbarTitle()
+                                        viewModel.updateEditorSession(f, c.orEmpty(), hasUnsavedChanges = false)
                                         // show preview
-                                        if (f.name.lowercase(Locale.getDefault()).endsWith(".md")) {
+                                        if (canPreviewMarkdown()) {
                                             if (!isPreviewMode) togglePreview()
                                         }
                                     }
@@ -777,11 +836,12 @@ class EditorFragment : Fragment() {
                                 activity?.runOnUiThread {
                                     if (f != null) {
                                         currentFile = f
-                                        binding.editorView.setText(c ?: "")
+                                        currentFileExtension = resolveFileType(f)
+                                        setEditorText(c ?: "")
                                         isDirty = false
                                         updateToolbarTitle()
-                                        val ext2 = f.name.substringAfterLast('.').lowercase(Locale.getDefault())
-                                        if (ext2 == "md") {
+                                        viewModel.updateEditorSession(f, c.orEmpty(), hasUnsavedChanges = false)
+                                        if (canPreviewMarkdown()) {
                                             if (!isPreviewMode) togglePreview()
                                         } else {
                                             Toast.makeText(requireContext(), "Preview available only for Markdown files", Toast.LENGTH_SHORT).show()
@@ -798,8 +858,7 @@ class EditorFragment : Fragment() {
         }
 
         // No unsaved changes; just show preview if file is Markdown
-        val ext = currentFile?.name?.substringAfterLast('.')?.lowercase(Locale.getDefault()) ?: ""
-        if (ext == "md") {
+        if (canPreviewMarkdown()) {
             if (!isPreviewMode) togglePreview()
         } else {
             Toast.makeText(requireContext(), "Preview available only for Markdown files", Toast.LENGTH_SHORT).show()
