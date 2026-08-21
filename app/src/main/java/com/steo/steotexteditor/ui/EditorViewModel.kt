@@ -148,6 +148,13 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
     fun restoreVersion(fileId: Long, versionNumber: Int, onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
             val result = fileRepository.restoreVersion(fileId, versionNumber)
+            if (result) {
+                val file = fileRepository.getFileById(fileId)
+                val content = fileRepository.reconstructVersion(fileId, versionNumber).orEmpty()
+                _currentFile.value = file
+                updateEditorSession(file, content, hasUnsavedChanges = false)
+                FileHelper.clearCrashRecovery(context)
+            }
             onComplete(result)
         }
     }

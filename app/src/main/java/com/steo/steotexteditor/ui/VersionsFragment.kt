@@ -76,8 +76,14 @@ class VersionsFragment : Fragment() {
         }
         lifecycleScope.launch {
             val versions = viewModel.getVersionsForFile(fileId)
+            val items = versions.mapIndexed { index, version ->
+                val previousContent = if (index == 0) "" else viewModel.reconstructVersion(fileId, versions[index - 1].versionNumber).orEmpty()
+                val currentContent = viewModel.reconstructVersion(fileId, version.versionNumber).orEmpty()
+                val stats = countLineChanges(previousContent, currentContent)
+                VersionListItem(version, stats.added, stats.removed)
+            }
             activity?.runOnUiThread {
-                adapter.submitList(versions)
+                adapter.submitList(items.asReversed())
                 binding.tvRevisionCount.text = "${versions.size} ${if (versions.size == 1) "REVISION" else "REVISIONS"}"
                 if (versions.isEmpty()) {
                     showEmptyState("NO SAVED SNAPSHOTS YET.\nSAVE THIS FILE TO VIEW ITS HISTORY.")
@@ -118,6 +124,48 @@ class VersionsFragment : Fragment() {
         binding.tvVersionsEmpty.text = message
         binding.tvVersionsEmpty.visibility = View.VISIBLE
     }
+
+    private fun countLineChanges(previousContent: String, currentContent: String): LineStats {
+        val previousLines = previousContent.lines().filterNot { it.isEmpty() }
+        val currentLines = currentContent.lines().filterNot { it.isEmpty() }
+        val table = Array(previousLines.size + 1) { IntArray(currentLines.size + 1) }
+        for (oldIndex in previousLines.indices.reversed()) {
+            for (newIndex in currentLines.indices.reversed()) {
+                table[oldIndex][newIndex] = if (previousLines[oldIndex] == currentLines[newIndex]) {
+                    table[oldIndex + 1][newIndex + 1] + 1
+                } else {
+                    maxOf(table[oldIndex + 1][newIndex], table[oldIndex][newIndex + 1])
+                }
+            }
+        }
+
+        var oldIndex = 0
+        var newIndex = 0
+        var added = 0
+        var removed = 0
+        while (oldIndex < previousLines.size || newIndex < currentLines.size) {
+            when {
+                oldIndex < previousLines.size &&
+                    newIndex < currentLines.size &&
+                    previousLines[oldIndex] == currentLines[newIndex] -> {
+                    oldIndex++
+                    newIndex++
+                }
+                newIndex < currentLines.size &&
+                    (oldIndex >= previousLines.size || table[oldIndex][newIndex + 1] >= table[oldIndex + 1][newIndex]) -> {
+                    added++
+                    newIndex++
+                }
+                oldIndex < previousLines.size -> {
+                    removed++
+                    oldIndex++
+                }
+            }
+        }
+        return LineStats(added, removed)
+    }
+
+    private data class LineStats(val added: Int, val removed: Int)
 
     override fun onDestroyView() {
         super.onDestroyView()

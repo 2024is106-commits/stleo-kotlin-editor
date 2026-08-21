@@ -1,13 +1,17 @@
 package com.steo.steotexteditor.ui
 
+import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -19,25 +23,33 @@ import kotlinx.coroutines.launch
 class DiffFragment : Fragment() {
     private lateinit var viewModel: EditorViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         viewModel = ViewModelProvider(requireActivity()).get(EditorViewModel::class.java)
-        val root = ScrollView(requireContext())
-        root.setBackgroundResource(R.drawable.starfield_background)
-        val padding = (24 * resources.displayMetrics.density).toInt()
+
+        val root = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundResource(R.drawable.starfield_background)
+            setPadding(dp(16), 0, dp(16), dp(16))
+        }
+
+        val scroll = ScrollView(requireContext()).apply {
+            overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
+        }
         val content = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(padding, padding, padding, padding)
+            background = solid(Color.parseColor("#111515"))
         }
-        root.addView(content, ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        ))
+        scroll.addView(
+            content,
+            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        )
+        root.addView(scroll, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
 
-        loadDiffs(content)
+        loadLatestDiff(root, content)
         return root
     }
 
-    private fun loadDiffs(content: LinearLayout) {
+    private fun loadLatestDiff(root: LinearLayout, content: LinearLayout) {
         val file = viewModel.currentFile.value
         if (file == null) {
             content.addView(emptyText("NO FILE OPEN.\nOPEN OR CREATE A FILE IN THE EDITOR TO VIEW ITS HISTORY."))
@@ -51,165 +63,166 @@ class DiffFragment : Fragment() {
 
         lifecycleScope.launch {
             val versions = viewModel.getVersionsForFile(file.id)
-            val diffBlocks = versions.zipWithNext().map { (previous, current) ->
-                val previousContent = viewModel.reconstructVersion(file.id, previous.versionNumber).orEmpty()
-                val currentContent = viewModel.reconstructVersion(file.id, current.versionNumber).orEmpty()
-                DiffBlock(
-                    previous = previous,
-                    current = current,
-                    rows = buildLineDiff(previousContent, currentContent)
-                )
-            }
-            activity?.runOnUiThread {
-                if (versions.size < 2) {
+            if (versions.size < 2) {
+                activity?.runOnUiThread {
                     content.addView(emptyText("NO DIFFS TO SHOW YET.\nTRY SAVING YOUR CODE"))
-                    return@runOnUiThread
                 }
+                return@launch
+            }
 
-                diffBlocks.forEach { block ->
-                    addDiffBlock(content, block.previous, block.current, block.rows)
-                }
+            val previous = versions[versions.lastIndex - 1]
+            val current = versions.last()
+            val previousContent = viewModel.reconstructVersion(file.id, previous.versionNumber).orEmpty()
+            val currentContent = viewModel.reconstructVersion(file.id, current.versionNumber).orEmpty()
+            val rows = buildDiffRows(previousContent, currentContent)
+
+            activity?.runOnUiThread {
+                addDiffPanel(content, previous, current, rows)
+                root.addView(restoreButton(current))
             }
         }
     }
 
-    private fun addDiffBlock(
-        parent: LinearLayout,
-        previous: VersionEntity,
-        current: VersionEntity,
-        rows: List<DiffRow>
-    ) {
+    private fun addDiffPanel(parent: LinearLayout, previous: VersionEntity, current: VersionEntity, rows: List<DiffRow>) {
         parent.addView(TextView(requireContext()).apply {
             text = "DIFF - V${previous.versionNumber} -> V${current.versionNumber}"
             setTextColor(ContextCompat.getColor(requireContext(), R.color.text_off_white))
             typeface = loadSilkscreen()
-            textSize = 16f
+            textSize = 14f
             letterSpacing = 0.076f
-            setPadding(0, 0, 0, 12)
+            setPadding(dp(16), dp(14), dp(16), dp(14))
         })
 
         if (rows.isEmpty()) {
-            parent.addView(TextView(requireContext()).apply {
-                text = "NO LINE CHANGES"
-                setTextColor(ContextCompat.getColor(requireContext(), R.color.line_number_gray))
-                typeface = Typeface.create("Consolas", Typeface.NORMAL)
-                textSize = 12f
-                setPadding(0, 0, 0, 18)
-            })
+            parent.addView(emptyText("NO LINE CHANGES"))
             return
         }
 
-        rows.forEach { row -> parent.addView(diffRowView(row)) }
+        rows.forEach { row ->
+            parent.addView(diffRowView(row))
+        }
     }
 
     private fun diffRowView(row: DiffRow): TextView {
-        val color = when (row.kind) {
-            DiffKind.ADDED -> ColorPalette.added
-            DiffKind.REMOVED -> ColorPalette.removed
+        val backgroundColor = when (row.kind) {
+            DiffKind.CONTEXT -> Color.TRANSPARENT
+            DiffKind.ADDED -> Color.parseColor("#1D2924")
+            DiffKind.REMOVED -> Color.parseColor("#312522")
+            DiffKind.MODIFIED -> Color.parseColor("#2D2A1D")
+        }
+        val textColor = when (row.kind) {
+            DiffKind.CONTEXT -> Color.parseColor("#C8C8C8")
+            DiffKind.ADDED -> Color.parseColor("#D9F0DD")
+            DiffKind.REMOVED -> Color.parseColor("#FFB8AE")
             DiffKind.MODIFIED -> ColorPalette.modified
         }
         return TextView(requireContext()).apply {
             text = row.label
-            setTextColor(color)
+            setTextColor(textColor)
             typeface = Typeface.create("Consolas", Typeface.NORMAL)
             textSize = 14f
-            setPadding(0, 2, 0, 2)
+            includeFontPadding = false
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(16), dp(6), dp(12), dp(6))
+            setBackgroundColor(backgroundColor)
         }
     }
 
-    private fun buildLineDiff(previousContent: String, currentContent: String): List<DiffRow> {
+    private fun restoreButton(version: VersionEntity): TextView {
+        return TextView(requireContext()).apply {
+            text = "RESTORE THIS VERSION"
+            setTextColor(Color.parseColor("#151516"))
+            typeface = loadSilkscreen()
+            textSize = 14f
+            letterSpacing = 0.076f
+            gravity = Gravity.CENTER
+            setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_history_24, 0, 0, 0)
+            compoundDrawablePadding = dp(8)
+            background = solid(Color.parseColor("#E8E8E8"))
+            setOnClickListener {
+                val fileId = viewModel.currentFile.value?.id ?: return@setOnClickListener
+                viewModel.restoreVersion(fileId, version.versionNumber) { success ->
+                    activity?.runOnUiThread {
+                        Toast.makeText(
+                            requireContext(),
+                            if (success) "Version restored" else "Failed to restore version",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }.also {
+            it.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)).apply {
+                topMargin = dp(12)
+            }
+        }
+    }
+
+    private fun buildDiffRows(previousContent: String, currentContent: String): List<DiffRow> {
         val previousLines = previousContent.lines()
         val currentLines = currentContent.lines()
-        val lcs = buildLcsTable(previousLines, currentLines)
-        val rows = mutableListOf<DiffRow>()
+        val table = buildLcsTable(previousLines, currentLines)
+        val operations = mutableListOf<LineOperation>()
         var oldIndex = 0
         var newIndex = 0
 
         while (oldIndex < previousLines.size || newIndex < currentLines.size) {
-            if (
+            when {
                 oldIndex < previousLines.size &&
-                newIndex < currentLines.size &&
-                previousLines[oldIndex] == currentLines[newIndex]
-            ) {
-                oldIndex++
-                newIndex++
-                continue
-            }
-
-            val removedStart = oldIndex
-            val addedStart = newIndex
-            while (
-                oldIndex < previousLines.size &&
-                newIndex < currentLines.size &&
-                previousLines[oldIndex] != currentLines[newIndex]
-            ) {
-                if (lcs[oldIndex + 1][newIndex] >= lcs[oldIndex][newIndex + 1]) {
+                    newIndex < currentLines.size &&
+                    previousLines[oldIndex] == currentLines[newIndex] -> {
+                    operations.add(LineOperation(DiffKind.CONTEXT, oldIndex + 1, newIndex + 1, previousLines[oldIndex]))
                     oldIndex++
-                } else {
                     newIndex++
                 }
-            }
-
-            while (
-                oldIndex < previousLines.size &&
-                (newIndex >= currentLines.size || lcs[oldIndex + 1][newIndex] >= lcs[oldIndex][newIndex + 1]) &&
-                (newIndex >= currentLines.size || previousLines[oldIndex] != currentLines[newIndex])
-            ) {
-                oldIndex++
-            }
-
-            while (
                 newIndex < currentLines.size &&
-                (oldIndex >= previousLines.size || lcs[oldIndex][newIndex + 1] > lcs[oldIndex + 1][newIndex]) &&
-                (oldIndex >= previousLines.size || previousLines[oldIndex] != currentLines[newIndex])
-            ) {
-                newIndex++
+                    (oldIndex >= previousLines.size || table[oldIndex][newIndex + 1] >= table[oldIndex + 1][newIndex]) -> {
+                    operations.add(LineOperation(DiffKind.ADDED, null, newIndex + 1, currentLines[newIndex]))
+                    newIndex++
+                }
+                oldIndex < previousLines.size -> {
+                    operations.add(LineOperation(DiffKind.REMOVED, oldIndex + 1, null, previousLines[oldIndex]))
+                    oldIndex++
+                }
             }
-
-            appendChangedRows(
-                rows = rows,
-                previousLines = previousLines,
-                currentLines = currentLines,
-                removedStart = removedStart,
-                removedEnd = oldIndex,
-                addedStart = addedStart,
-                addedEnd = newIndex
-            )
         }
 
-        return rows
+        return combineModifiedRows(operations).map { op ->
+            when (op.kind) {
+                DiffKind.CONTEXT -> DiffRow(DiffKind.CONTEXT, "${op.newLineNumber.toString().padStart(4)}    ${op.text}")
+                DiffKind.ADDED -> DiffRow(DiffKind.ADDED, "+ L${op.newLineNumber}    ${op.text}")
+                DiffKind.REMOVED -> DiffRow(DiffKind.REMOVED, "- L${op.oldLineNumber}    ${op.text}")
+                DiffKind.MODIFIED -> DiffRow(
+                    DiffKind.MODIFIED,
+                    "~ L${op.oldLineNumber}->L${op.newLineNumber}    ${op.text}  =>  ${op.newText.orEmpty()}"
+                )
+            }
+        }
     }
 
-    private fun appendChangedRows(
-        rows: MutableList<DiffRow>,
-        previousLines: List<String>,
-        currentLines: List<String>,
-        removedStart: Int,
-        removedEnd: Int,
-        addedStart: Int,
-        addedEnd: Int
-    ) {
-        val removedCount = removedEnd - removedStart
-        val addedCount = addedEnd - addedStart
-        val modifiedCount = minOf(removedCount, addedCount)
-
-        for (offset in 0 until modifiedCount) {
-            rows.add(
-                DiffRow(
-                    DiffKind.MODIFIED,
-                    "M L${removedStart + offset + 1}->L${addedStart + offset + 1}: " +
-                        "${previousLines[removedStart + offset]}  =>  ${currentLines[addedStart + offset]}"
+    private fun combineModifiedRows(operations: List<LineOperation>): List<LineOperation> {
+        val combined = mutableListOf<LineOperation>()
+        var index = 0
+        while (index < operations.size) {
+            val current = operations[index]
+            val next = operations.getOrNull(index + 1)
+            if (current.kind == DiffKind.REMOVED && next?.kind == DiffKind.ADDED) {
+                combined.add(
+                    LineOperation(
+                        kind = DiffKind.MODIFIED,
+                        oldLineNumber = current.oldLineNumber,
+                        newLineNumber = next.newLineNumber,
+                        text = current.text,
+                        newText = next.text
+                    )
                 )
-            )
+                index += 2
+            } else {
+                combined.add(current)
+                index++
+            }
         }
-
-        for (index in removedStart + modifiedCount until removedEnd) {
-            rows.add(DiffRow(DiffKind.REMOVED, "- L${index + 1}: ${previousLines[index]}"))
-        }
-
-        for (index in addedStart + modifiedCount until addedEnd) {
-            rows.add(DiffRow(DiffKind.ADDED, "+ L${index + 1}: ${currentLines[index]}"))
-        }
+        return combined
     }
 
     private fun buildLcsTable(previousLines: List<String>, currentLines: List<String>): Array<IntArray> {
@@ -231,9 +244,10 @@ class DiffFragment : Fragment() {
             text = message
             setTextColor(ContextCompat.getColor(requireContext(), R.color.line_number_gray))
             typeface = loadSilkscreen()
-            gravity = android.view.Gravity.CENTER
+            gravity = Gravity.CENTER
             textSize = 12f
             letterSpacing = 0.076f
+            setPadding(dp(24), dp(40), dp(24), dp(40))
         }
     }
 
@@ -245,13 +259,21 @@ class DiffFragment : Fragment() {
         }
     }
 
+    private fun solid(color: Int): GradientDrawable {
+        return GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = 0f
+        }
+    }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+
     private object ColorPalette {
-        val added = android.graphics.Color.parseColor("#00FF3B")
-        val removed = android.graphics.Color.parseColor("#FF3045")
-        val modified = android.graphics.Color.parseColor("#FFD84D")
+        val modified = Color.parseColor("#FFD84D")
     }
 
     private enum class DiffKind {
+        CONTEXT,
         ADDED,
         REMOVED,
         MODIFIED
@@ -262,9 +284,11 @@ class DiffFragment : Fragment() {
         val label: String
     )
 
-    private data class DiffBlock(
-        val previous: VersionEntity,
-        val current: VersionEntity,
-        val rows: List<DiffRow>
+    private data class LineOperation(
+        val kind: DiffKind,
+        val oldLineNumber: Int?,
+        val newLineNumber: Int?,
+        val text: String,
+        val newText: String? = null
     )
 }

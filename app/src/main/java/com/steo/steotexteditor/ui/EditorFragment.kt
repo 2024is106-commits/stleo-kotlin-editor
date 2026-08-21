@@ -125,11 +125,32 @@ class EditorFragment : Fragment() {
         setupBars()
         setupTextWatcher()
         setupBackPressHandling()
+        observeEditorSession()
         undoRedoManager = UndoRedoManager(binding.editorView)
         // Initialize Markwon for Markdown preview (core only)
         markwon = Markwon.builder(requireContext()).build()
 
         loadFile()
+    }
+
+    private fun observeEditorSession() {
+        viewModel.sessionState.observe(viewLifecycleOwner) { state ->
+            val file = currentFile ?: return@observe
+            if (state.currentFileId != file.id || state.currentFileContent == binding.editorView.text?.toString()) {
+                return@observe
+            }
+
+            val scrollX = binding.editorView.scrollX
+            val scrollY = binding.editorView.scrollY
+            currentFileExtension = state.currentFileType
+            setEditorText(state.currentFileContent)
+            isDirty = state.hasUnsavedChanges
+            updateToolbarTitle()
+            scheduleHighlighting()
+            binding.editorView.post {
+                binding.editorView.scrollTo(scrollX, scrollY)
+            }
+        }
     }
 
     private fun showRecoveryDialog(draft: FileHelper.RecoveryDraft, onDiscard: () -> Unit) {

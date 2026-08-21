@@ -15,15 +15,18 @@ import java.util.Date
 import java.util.Locale
 
 class VersionAdapter(
-    initial: List<VersionEntity>,
+    initial: List<VersionListItem>,
     private val onClick: (VersionEntity) -> Unit,
     private val onLongClick: (VersionEntity) -> Unit
-) : ListAdapter<VersionEntity, VersionAdapter.VH>(DIFF) {
+) : ListAdapter<VersionListItem, VersionAdapter.VH>(DIFF) {
 
     companion object {
-        private val DIFF = object : DiffUtil.ItemCallback<VersionEntity>() {
-            override fun areItemsTheSame(oldItem: VersionEntity, newItem: VersionEntity): Boolean = oldItem.id == newItem.id
-            override fun areContentsTheSame(oldItem: VersionEntity, newItem: VersionEntity): Boolean = oldItem == newItem
+        private val DIFF = object : DiffUtil.ItemCallback<VersionListItem>() {
+            override fun areItemsTheSame(oldItem: VersionListItem, newItem: VersionListItem): Boolean =
+                oldItem.version.id == newItem.version.id
+
+            override fun areContentsTheSame(oldItem: VersionListItem, newItem: VersionListItem): Boolean =
+                oldItem == newItem
         }
     }
 
@@ -35,9 +38,10 @@ class VersionAdapter(
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        val version = getItem(position)
-        val latestVersionNumber = currentList.maxOfOrNull { it.versionNumber }
-        holder.bind(version, latestVersionNumber == version.versionNumber)
+        val item = getItem(position)
+        val version = item.version
+        val latestVersionNumber = currentList.maxOfOrNull { it.version.versionNumber }
+        holder.bind(item, latestVersionNumber == version.versionNumber)
         holder.itemView.setOnClickListener { onClick(version) }
         holder.itemView.setOnLongClickListener { onLongClick(version); true }
         holder.btnDiff.setOnClickListener { onClick(version) }
@@ -56,17 +60,26 @@ class VersionAdapter(
         private val tvAdded: TextView = v.findViewById(R.id.tvAdded)
         private val tvRemoved: TextView = v.findViewById(R.id.tvRemoved)
 
-        fun bind(version: VersionEntity, isLatest: Boolean) {
+        fun bind(item: VersionListItem, isLatest: Boolean) {
+            val version = item.version
             tvBadge.text = "V${version.versionNumber}"
             tvLatest.isVisible = isLatest
             latestAccent.isVisible = isLatest
-            tvLabel.text = "Version ${version.versionNumber}"
+            tvLabel.text = version.label.ifBlank { "Version ${version.versionNumber}" }
             tvTimestamp.text = SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.getDefault()).format(Date(version.createdAt))
-            btnDiff.text = "PREVIEW"
+            btnDiff.text = "DIFF"
 
-            diffStatsRow.isVisible = false
-            tvAdded.isVisible = false
-            tvRemoved.isVisible = false
+            diffStatsRow.isVisible = item.addedLines > 0 || item.removedLines > 0
+            tvAdded.isVisible = item.addedLines > 0
+            tvRemoved.isVisible = item.removedLines > 0
+            tvAdded.text = "+${item.addedLines} LINES"
+            tvRemoved.text = "-${item.removedLines} LINES"
         }
     }
 }
+
+data class VersionListItem(
+    val version: VersionEntity,
+    val addedLines: Int,
+    val removedLines: Int
+)
