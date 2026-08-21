@@ -564,6 +564,13 @@ class EditorFragment : Fragment() {
             return
         }
         
+        val activeFile = viewModel.currentFile.value
+        val activeSession = viewModel.sessionState.value
+        if (activeFile != null && activeSession?.currentFileId == currentFileId) {
+            resumeEditorSession(activeFile)
+            return
+        }
+
         viewModel.loadFile(currentFileId) { file, content ->
             activity?.runOnUiThread {
                 if (file != null && content != null) {

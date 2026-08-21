@@ -20,13 +20,15 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.steo.steotexteditor.R
 
 class MainActivity : AppCompatActivity() {
     private val viewModel: EditorViewModel by viewModels()
+    private var syncingBottomNav = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +39,7 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.navHostFragment) as NavHostFragment
         val navController = navHostFragment.navController
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
-        bottomNav.setupWithNavController(navController)
+        setupBottomNavigation(bottomNav, navController)
 
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
         findViewById<ImageButton>(R.id.btnTopDrawer)?.setOnClickListener {
@@ -50,24 +52,6 @@ class MainActivity : AppCompatActivity() {
         updateUserInfo()
         setupObservers()
 
-        // Intercept Run button to trigger preview/save flow
-        bottomNav.setOnItemSelectedListener { item ->
-            if (item.itemId == R.id.nav_run) {
-                val navHostFragment = supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
-                val currentFrag = navHostFragment.childFragmentManager.fragments.firstOrNull()
-                if (currentFrag is EditorFragment) {
-                    currentFrag.handleRunAction()
-                    true
-                } else {
-                    // not in editor - navigate normally
-                    navigateToTab(navController, item.itemId)
-                }
-            } else {
-                // default navigation for other items
-                navigateToTab(navController, item.itemId)
-            }
-        }
-
         val profileBar = findViewById<View>(R.id.profileBar)
         ViewCompat.setOnApplyWindowInsetsListener(profileBar) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -79,6 +63,38 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, systemBars.bottom)
             insets
+        }
+    }
+
+    private fun setupBottomNavigation(bottomNav: BottomNavigationView, navController: NavController) {
+        bottomNav.setOnItemSelectedListener { item ->
+            if (syncingBottomNav) {
+                return@setOnItemSelectedListener true
+            }
+            navigateToTab(navController, item.itemId)
+        }
+
+        bottomNav.setOnItemReselectedListener { item ->
+            if (item.itemId == R.id.nav_run) {
+                navigateToTab(navController, item.itemId)
+            }
+        }
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            val menuItemId = when (destination.id) {
+                R.id.nav_home,
+                R.id.nav_edit,
+                R.id.nav_run,
+                R.id.nav_logs,
+                R.id.nav_diff -> destination.id
+                else -> null
+            }
+
+            if (menuItemId != null && bottomNav.selectedItemId != menuItemId) {
+                syncingBottomNav = true
+                bottomNav.selectedItemId = menuItemId
+                syncingBottomNav = false
+            }
         }
     }
 
@@ -193,10 +209,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToTab(navController: androidx.navigation.NavController, destinationId: Int): Boolean {
+    private fun navigateToTab(navController: NavController, destinationId: Int): Boolean {
         return try {
             if (navController.currentDestination?.id != destinationId) {
-                navController.navigate(destinationId)
+                val args = if (destinationId == R.id.nav_edit) {
+                    Bundle().apply {
+                        val currentFileId = viewModel.sessionState.value?.currentFileId ?: 0L
+                        if (currentFileId > 0L) {
+                            putLong("file_id", currentFileId)
+                        }
+                    }
+                } else {
+                    null
+                }
+                val navOptions = NavOptions.Builder()
+                    .setLaunchSingleTop(true)
+                    .setPopUpTo(navController.graph.startDestinationId, false)
+                    .build()
+                navController.navigate(destinationId, args, navOptions)
             }
             true
         } catch (_: IllegalArgumentException) {
