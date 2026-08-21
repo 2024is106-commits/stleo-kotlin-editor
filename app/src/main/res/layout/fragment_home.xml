@@ -8,23 +8,14 @@
     android:padding="24dp">
 
     <TextView
+        android:id="@+id/tvHomeHeadline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/silkscreen"
-        android:text="WELCOME TO STEOCODE!"
+        android:text="Ready to write your first line of code LEO?"
         android:textColor="@color/text_off_white"
         android:textSize="22sp"
         android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/tvGreeting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:fontFamily="@font/silkscreen"
-        android:text="STARTING SOMETHING NEW TODAY,\nLEO?"
-        android:textColor="@color/text_off_white"
-        android:textSize="14sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -115,10 +106,15 @@
 
     </LinearLayout>
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.45" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="16dp"
         android:background="@color/editor_white"
         android:fontFamily="@font/silkscreen"
         android:gravity="center"
@@ -131,18 +127,18 @@
         android:id="@+id/rvRecentFiles"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="0.8"
         android:layout_marginTop="8dp" />
 
     <TextView
         android:id="@+id/tvNoRecentFiles"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="0.8"
         android:fontFamily="monospace"
         android:gravity="center"
         android:letterSpacing="0.08"
-        android:text="No recent files"
+        android:text="NO RECENT FILES"
         android:textColor="@color/line_number_gray"
         android:textSize="12sp"
         android:visibility="gone" />

@@ -52,6 +52,7 @@ class VersionAdapter(
         private val tvLabel: TextView = v.findViewById(R.id.tvLabel)
         private val tvTimestamp: TextView = v.findViewById(R.id.tvTimestamp)
         private val tvLatest: TextView = v.findViewById(R.id.tvLatest)
+        private val diffStatsRow: View = v.findViewById(R.id.diffStatsRow)
         private val tvAdded: TextView = v.findViewById(R.id.tvAdded)
         private val tvRemoved: TextView = v.findViewById(R.id.tvRemoved)
 
@@ -59,40 +60,13 @@ class VersionAdapter(
             tvBadge.text = "V${version.versionNumber}"
             tvLatest.isVisible = isLatest
             latestAccent.isVisible = isLatest
-            tvLabel.text = if (version.label.isBlank()) "Updated main.kt" else version.label
-            tvTimestamp.text = formatRelativeTime(version.createdAt)
+            tvLabel.text = "Saved snapshot v${version.versionNumber}"
+            tvTimestamp.text = SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.getDefault()).format(Date(version.createdAt))
+            btnDiff.text = "PREVIEW"
 
-            val added = if (version.versionNumber == 1) {
-                version.patchText?.lines()?.count { it.isNotBlank() } ?: 0
-            } else {
-                countDiffLines(version.patchText, '+')
-            }
-            val removed = countDiffLines(version.patchText, '-')
-            tvAdded.text = "+$added LINES"
-            tvRemoved.text = "-$removed LINES"
-            tvAdded.isVisible = added > 0
-            tvRemoved.isVisible = removed > 0
-        }
-
-        private fun countDiffLines(patchText: String?, marker: Char): Int {
-            if (patchText.isNullOrBlank()) return 0
-            return patchText.lines().count { line ->
-                line.firstOrNull() == marker && !line.startsWith("$marker$marker$marker")
-            }
-        }
-
-        private fun formatRelativeTime(createdAt: Long): String {
-            val elapsedMillis = System.currentTimeMillis() - createdAt
-            val minutes = elapsedMillis / 60000L
-            val hours = minutes / 60L
-            val days = hours / 24L
-            return when {
-                minutes < 1 -> "NOW"
-                minutes < 60 -> "${minutes}M AGO"
-                hours < 24 -> "${hours}H AGO"
-                days < 7 -> "${days}D AGO"
-                else -> SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(createdAt))
-            }
+            diffStatsRow.isVisible = false
+            tvAdded.isVisible = false
+            tvRemoved.isVisible = false
         }
     }
 }

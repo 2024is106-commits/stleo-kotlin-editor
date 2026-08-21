@@ -46,10 +46,24 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvVersions"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:clipToPadding="false"
         android:paddingTop="16dp"
         android:paddingBottom="32dp"
         android:overScrollMode="ifContentScrolls" />
+
+    <TextView
+        android:id="@+id/tvVersionsEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:letterSpacing="0.08"
+        android:text="NO FILE OPEN.\nOPEN OR CREATE A FILE IN THE EDITOR TO VIEW ITS HISTORY."
+        android:textColor="@color/line_number_gray"
+        android:textSize="12sp"
+        android:visibility="gone" />
 
 </LinearLayout>

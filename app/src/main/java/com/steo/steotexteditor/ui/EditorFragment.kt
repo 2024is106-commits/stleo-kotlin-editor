@@ -3,6 +3,7 @@ package com.steo.steotexteditor.ui
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -25,6 +26,7 @@ import android.widget.TextView as AndroidTextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.getSpans
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -115,7 +117,7 @@ class EditorFragment : Fragment() {
         
         // Get file ID from arguments
         currentFileId = arguments?.getLong("file_id") ?: -1
-        pendingNewFileExtension = arguments?.getString("file_extension") ?: "kt"
+        pendingNewFileExtension = arguments?.getString("file_extension") ?: "txt"
         
         setupDrawer()
         setupSearchBar()
@@ -134,9 +136,10 @@ class EditorFragment : Fragment() {
     private fun checkCrashRecovery() {
         val crashRecoveryContent = FileHelper.readCrashRecovery(requireContext())
         if (!crashRecoveryContent.isNullOrEmpty()) {
+            val fileName = currentFile?.name ?: defaultUntitledName(currentFileExtension.ifBlank { pendingNewFileExtension })
             AlertDialog.Builder(requireContext())
                 .setTitle("Recover Unsaved Work")
-                .setMessage("It looks like the app closed unexpectedly. Would you like to restore your unsaved content?")
+                .setMessage("It looks like the app closed unexpectedly while editing $fileName. Would you like to restore or discard your unsaved content?")
                 .setPositiveButton("Restore") { _, _ ->
                     binding.editorView.setText(crashRecoveryContent)
                     isDirty = true
@@ -264,13 +267,7 @@ class EditorFragment : Fragment() {
 
     private fun setupBars() {
         binding.btnNavToggle.setOnClickListener {
-            if (::drawerLayout.isInitialized) {
-                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    drawerLayout.closeDrawer(GravityCompat.START)
-                } else {
-                    drawerLayout.openDrawer(GravityCompat.START)
-                }
-            }
+            androidx.navigation.Navigation.findNavController(requireView()).navigate(R.id.nav_home)
         }
         
         binding.btnSave.setOnClickListener {
@@ -321,11 +318,17 @@ class EditorFragment : Fragment() {
 
         binding.etFileName.setOnEditorActionListener { v, actionId, event ->
             if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
-                val newName = binding.etFileName.text.toString()
+                val newName = binding.etFileName.text.toString().removeSuffix("*").trim()
                 if (newName.isNotEmpty() && currentFile != null) {
+                    val previousName = currentFile!!.name
+                    val isUnsavedFile = currentFile!!.id == 0L
                     currentFile = currentFile!!.copy(name = newName)
                     isDirty = true
                     updateToolbarTitle()
+                    if (isUnsavedFile && previousName != newName) {
+                        Toast.makeText(requireContext(), "File renamed", Toast.LENGTH_SHORT).show()
+                        currentFile?.let { viewModel.recordActivity(it, "File renamed") }
+                    }
                 }
                 v.clearFocus()
                 true
@@ -464,6 +467,17 @@ class EditorFragment : Fragment() {
 
     private fun loadFile() {
         if (currentFileId == -1L) {
+            val activeFile = viewModel.currentFile.value
+            if (activeFile != null) {
+                resumeEditorSession(activeFile)
+                return
+            }
+
+            if (arguments?.containsKey("file_extension") != true) {
+                showFileTypeChooser { clearEditor(it) }
+                return
+            }
+
             // New file
             currentFile = FileEntity(
                 id = 0,
@@ -516,6 +530,37 @@ class EditorFragment : Fragment() {
         }
     }
 
+    private fun resumeEditorSession(file: FileEntity) {
+        currentFile = file
+        currentFileId = file.id
+        currentFileExtension = file.name.substringAfterLast('.', file.fileType).lowercase(Locale.getDefault())
+
+        if (file.id > 0L) {
+            val inMemoryContent = viewModel.editorContent.value
+            if (inMemoryContent != null) {
+                binding.editorView.setText(inMemoryContent)
+                updateToolbarTitle()
+                scheduleHighlighting()
+                return
+            }
+
+            viewModel.loadFile(file.id) { loadedFile, content ->
+                activity?.runOnUiThread {
+                    currentFile = loadedFile ?: file
+                    binding.editorView.setText(content ?: viewModel.editorContent.value.orEmpty())
+                    isDirty = false
+                    updateToolbarTitle()
+                    scheduleHighlighting()
+                }
+            }
+        } else {
+            binding.editorView.setText(viewModel.editorContent.value.orEmpty())
+            isDirty = false
+            updateToolbarTitle()
+            scheduleHighlighting()
+        }
+    }
+
     private fun clearEditor(extension: String = pendingNewFileExtension) {
         pendingNewFileExtension = extension
         binding.editorView.setText("")
@@ -537,13 +582,25 @@ class EditorFragment : Fragment() {
     private fun showFileTypeChooser(onSelected: (String) -> Unit) {
         val labels = arrayOf("Markdown file (.md)", "Kotlin file (.kt)", "Plain text file (.txt)")
         val extensions = arrayOf("md", "kt", "txt")
+        val title = android.widget.TextView(requireContext()).apply {
+            text = "What file are you creating?"
+            setTextColor(Color.BLACK)
+            textSize = 20f
+            typeface = try {
+                ResourcesCompat.getFont(requireContext(), R.font.silkscreen) ?: Typeface.DEFAULT_BOLD
+            } catch (_: Exception) {
+                Typeface.DEFAULT_BOLD
+            }
+            setPadding(48, 36, 48, 12)
+        }
         AlertDialog.Builder(requireContext())
-            .setTitle("What file are you creating?")
+            .setCustomTitle(title)
             .setItems(labels) { _, which -> onSelected(extensions[which]) }
+            .setOnCancelListener { onSelected("txt") }
             .show()
     }
 
-    private fun defaultUntitledName(extension: String): String = "Untitled.${extension.ifBlank { "kt" }}"
+    private fun defaultUntitledName(extension: String): String = "Untitled.${extension.ifBlank { "txt" }}"
 
     private fun showUnsavedChangesDialog(listener: DialogInterface.OnClickListener) {
         AlertDialog.Builder(requireContext())
@@ -614,7 +671,7 @@ class EditorFragment : Fragment() {
                 if (fileName.isNotEmpty()) {
                     // If no extension, keep the selected file type.
                     if (!fileName.contains(".")) {
-                        fileName += ".${currentFileExtension.ifBlank { "kt" }}"
+                        fileName += ".${currentFileExtension.ifBlank { "txt" }}"
                     }
 
                     viewModel.createNewFile(fileName, content) { fileId ->

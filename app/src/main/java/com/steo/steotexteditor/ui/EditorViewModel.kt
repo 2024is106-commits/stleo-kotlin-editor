@@ -15,6 +15,13 @@ import kotlinx.coroutines.withContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
+data class ActivityLogEntry(
+    val fileId: Long,
+    val fileName: String,
+    val message: String,
+    val timestamp: Long = System.currentTimeMillis()
+)
+
 class EditorViewModel(application: Application) : AndroidViewModel(application) {
     
     private val fileRepository = FileRepository(application)
@@ -46,8 +53,20 @@ class EditorViewModel(application: Application) : AndroidViewModel(application) 
     private val _currentFile = MutableLiveData<FileEntity?>()
     val currentFile: LiveData<FileEntity?> = _currentFile
 
+    private val _activityLogs = MutableLiveData<List<ActivityLogEntry>>(emptyList())
+    val activityLogs: LiveData<List<ActivityLogEntry>> = _activityLogs
+
     fun setCurrentFile(file: FileEntity?) {
-        _currentFile.postValue(file)
+        _currentFile.value = file
+    }
+
+    fun recordActivity(file: FileEntity, message: String) {
+        val entry = ActivityLogEntry(
+            fileId = file.id,
+            fileName = file.name,
+            message = message
+        )
+        _activityLogs.value = (_activityLogs.value.orEmpty() + entry)
     }
     
     suspend fun getVersionsForFile(fileId: Long): List<VersionEntity> {

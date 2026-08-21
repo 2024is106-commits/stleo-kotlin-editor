@@ -80,7 +80,7 @@
         android:id="@+id/tvEmptyRecent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No files to show yet"
+        android:text="NO FILES TO SHOW YET"
         android:textColor="@color/text_off_white"
         android:visibility="gone"
         android:paddingTop="8dp"

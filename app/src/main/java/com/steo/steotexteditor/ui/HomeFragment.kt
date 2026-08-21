@@ -2,12 +2,15 @@ package com.steo.steotexteditor.ui
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -52,23 +55,38 @@ class HomeFragment : Fragment() {
             showFileTypeChooser()
         }
 
-        updateGreeting(root)
+        updateHeadline(root)
 
         return root
     }
 
-    private fun updateGreeting(root: View) {
+    private fun updateHeadline(root: View) {
         val prefs = requireContext().getSharedPreferences("steo_prefs", Context.MODE_PRIVATE)
         val coderName = prefs.getString("coder_name", "LEO")
-        val greetingTv = root.findViewById<TextView>(R.id.tvGreeting)
-        greetingTv?.text = "STARTING SOMETHING NEW TODAY,\n${coderName?.uppercase()}?"
+        val headline = root.findViewById<TextView>(R.id.tvHomeHeadline)
+        headline?.text = "Ready to write your first line of code ${coderName?.uppercase()}?"
+    }
+
+    fun refreshCoderName() {
+        view?.let { updateHeadline(it) }
     }
 
     private fun showFileTypeChooser() {
         val labels = arrayOf("Markdown file (.md)", "Kotlin file (.kt)", "Plain text file (.txt)")
         val extensions = arrayOf("md", "kt", "txt")
+        val title = TextView(requireContext()).apply {
+            text = "What file are you creating?"
+            setTextColor(Color.BLACK)
+            textSize = 20f
+            typeface = try {
+                ResourcesCompat.getFont(requireContext(), R.font.silkscreen) ?: Typeface.DEFAULT_BOLD
+            } catch (_: Exception) {
+                Typeface.DEFAULT_BOLD
+            }
+            setPadding(48, 36, 48, 12)
+        }
         AlertDialog.Builder(requireContext())
-            .setTitle("What file are you creating?")
+            .setCustomTitle(title)
             .setItems(labels) { _, which ->
                 val bundle = Bundle().apply {
                     putLong("file_id", -1L)
